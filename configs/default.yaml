@@ -1,5 +1,6 @@
 # Default configuration for Smart Attendance. Every run logs the config it used.
 seed: 42
+timezone: Asia/Kolkata             # attendance times are shown in this time zone (cloud servers run on UTC)
 
 paths:
   data_raw: data/raw

@@ -72,10 +72,27 @@ def enrolled_students() -> list[str]:
     return sorted(p.name for p in ROSTER_DIR.iterdir() if p.is_dir()) if ROSTER_DIR.exists() else []
 
 
+def now() -> datetime:
+    """Current time in the school's time zone (configs/default.yaml: timezone). Cloud servers run on UTC."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo(cfg.get("timezone", "Asia/Kolkata"))).replace(tzinfo=None)
+    except Exception:          # no time-zone database on this machine: fall back to the computer's clock
+        return datetime.now()
+
+
 def register_download(rows: list[dict], key: str) -> None:
     df = pd.DataFrame(rows)
     st.download_button("Download register (CSV)", df.to_csv(index=False),
-                       f"attendance_{datetime.now():%Y-%m-%d}.csv", "text/csv", key=key)
+                       f"attendance_{now():%Y-%m-%d}.csv", "text/csv", key=key)
+
+
+def webrtc_available() -> bool:
+    try:
+        import streamlit_webrtc  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 st.title("Smart Attendance & Classroom Engagement Analyzer")
@@ -166,12 +183,16 @@ elif mode == "Live attendance":
     with st.sidebar:
         use_demo = (st.checkbox("Use the demo roster (12 LFW people) instead", value=roster is None)
                     if DEMO_ROSTER.exists() else False)
-        sources = ["Browser camera (take a photo)"] if ON_CLOUD else ["This computer's camera (live video)",
-                                                                       "Browser camera (take a photo)"]
-        source = st.radio("Camera", sources, help="Live video needs a camera attached to the computer running the "
-                          "app. The browser camera works anywhere, including the online app.")
-        browser = source.startswith("Browser")
-        cam = 0 if browser else st.number_input("Camera index", 0, 5, 0)
+        SRC_LOCAL, SRC_STREAM, SRC_PHOTO = ("This computer's camera (live video)", "Browser camera (live video)",
+                                            "Browser camera (take a photo)")
+        sources = ([] if ON_CLOUD else [SRC_LOCAL]) + ([SRC_STREAM] if webrtc_available() else []) + [SRC_PHOTO]
+        source = st.radio("Camera", sources, help="'This computer's camera' needs a camera attached to the computer "
+                          "running the app. The browser camera works anywhere, including the online app: live video "
+                          "streams it to the app; if live video does not connect (some networks block it), use "
+                          "'take a photo'.")
+        browser = source == SRC_PHOTO          # one still photo at a time
+        stream = source == SRC_STREAM          # live video from the browser (WebRTC)
+        cam = st.number_input("Camera index", 0, 5, 0) if source == SRC_LOCAL else 0
         threshold = st.slider("Match threshold (higher = stricter)", 0.30, 0.60, float(cfg["face"]["match_threshold"]), 0.01)
     if use_demo:
         roster = load_roster(DEMO_ROSTER)
@@ -179,7 +200,7 @@ elif mode == "Live attendance":
         st.warning("No students enrolled yet. Switch to **Enroll students** in the sidebar first.")
         st.stop()
 
-    key = (str(CLASS_ROSTER if not use_demo else DEMO_ROSTER), tuple(roster.student_ids), browser)
+    key = (str(CLASS_ROSTER if not use_demo else DEMO_ROSTER), tuple(roster.student_ids), source)
     if st.session_state.get("live_key") != key or "live" not in st.session_state:   # "live" is cleared after enrolment changes
         # live video: present after 3 of 5 consecutive frames; photo: each photo is a deliberate, still shot -> 1 match
         st.session_state["live"] = (LiveAttendance(roster, confirm_hits=1, window=1) if browser
@@ -191,10 +212,10 @@ elif mode == "Live attendance":
     top[0].metric("Enrolled", len(roster))
     present_ph, absent_ph = top[1].empty(), top[2].empty()      # filled at the end, after any new photo is counted
     with top[3]:
-        run = False if browser else st.toggle("Camera on", value=False)
+        run = source == SRC_LOCAL and st.toggle("Camera on", value=False)
         b1, b2 = st.columns(2)
         if not ON_CLOUD and b1.button("Save register"):
-            st.success(f"Saved {live.save(REGISTER_DIR)}")
+            st.success(f"Saved {live.save(REGISTER_DIR, now())}")
         if b2.button("New session (reset)"):
             st.session_state.pop("live", None)
             st.session_state.pop("last_photo", None)
@@ -203,12 +224,41 @@ elif mode == "Live attendance":
     left, right = st.columns([3, 2])
     if browser:
         shot = left.camera_input("Take a photo of the class (students facing the camera)")
+    if stream:
+        import av
+        from streamlit_webrtc import WebRtcMode, webrtc_streamer
+
+        engine = get_engine()
+        # The video callback runs in another thread: it may not touch st.* or st.session_state, so it gets plain
+        # objects through this closure, shared with the page under a lock.
+        shared = st.session_state.setdefault("stream_shared", {"lock": __import__("threading").Lock()})
+        shared.update(live=live, roster=roster, threshold=threshold, newly=shared.get("newly", []), faces=0)
+
+        def on_frame(frame: "av.VideoFrame") -> "av.VideoFrame":
+            img = frame.to_ndarray(format="bgr24")
+            faces = engine.analyze(img)
+            labels, scores = (shared["roster"].match(np.stack([f.embedding for f in faces]), shared["threshold"])
+                              if faces else ([], []))
+            with shared["lock"]:
+                newly = shared["live"].update(labels, scores, now())
+                shared["newly"].extend(newly)
+                shared["faces"] = len(faces)
+                marked = set(shared["live"].marked)
+            return av.VideoFrame.from_ndarray(draw_live(img, faces, labels, scores, marked), format="bgr24")
+
+        with left:
+            ctx = webrtc_streamer(key="live-attendance", mode=WebRtcMode.SENDRECV, video_frame_callback=on_frame,
+                                  media_stream_constraints={"video": True, "audio": False}, async_processing=True,
+                                  rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
     frame_ph = left.empty()
     status_ph = left.empty()
     reg_ph = right.empty()
     if browser:
         right.caption("Every enrolled student recognised in a photo is marked present. Take more photos to catch "
                       "students who were turned away. Unknown faces are never stored.")
+    elif stream:
+        right.caption("Click **START** under the video and allow camera access. A student is marked present after "
+                      "being recognised in 3 of 5 processed frames. Unknown faces are never stored.")
     else:
         right.caption("A student is marked present after being recognised in 3 of 5 consecutive frames. "
                       "Unknown faces are never stored. The register is auto-saved to reports/attendance/.")
@@ -222,11 +272,11 @@ elif mode == "Live attendance":
         labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold) if faces else ([], []))
         if st.session_state.get("last_photo") != digest:     # a rerun shows the same photo again: count it once
             st.session_state["last_photo"] = digest
-            newly = live.update(labels, scores)
+            newly = live.update(labels, scores, now())
             for sid in newly:
                 st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
             if newly and not ON_CLOUD:
-                live.save(REGISTER_DIR)
+                live.save(REGISTER_DIR, now())
         frame_ph.image(draw_live(frame, faces, labels, scores, set(live.marked))[:, :, ::-1], channels="RGB",
                        width="stretch")
         known = sum(l is not None for l in labels)
@@ -239,6 +289,25 @@ elif mode == "Live attendance":
     reg_ph.dataframe(pd.DataFrame(live.register()), width="stretch", hide_index=True)
     with right:
         register_download(live.register(), "live_register")
+
+    if stream and ctx.state.playing:
+        # keep the counts and register on the page in step with the video thread
+        while ctx.state.playing:
+            with shared["lock"]:
+                newly, shared["newly"] = shared["newly"], []
+                n_faces, rows, n_marked = shared["faces"], live.register(), len(live.marked)
+                times = {sid: live.marked[sid]["time"] for sid in newly}
+            for sid in newly:
+                st.toast(f"{sid} marked present at {times[sid]}")
+            if newly:
+                reg_ph.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+                present_ph.metric("Present", n_marked)
+                absent_ph.metric("Absent", len(roster) - n_marked)
+                if not ON_CLOUD:
+                    with shared["lock"]:
+                        live.save(REGISTER_DIR, now())
+            status_ph.caption(f"{n_faces} face(s) in view · {n_marked}/{len(roster)} present")
+            time.sleep(0.5)
 
     if run:
         engine = get_engine()
@@ -256,10 +325,10 @@ elif mode == "Live attendance":
                     faces = engine.analyze(frame)
                     labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold)
                                       if faces else ([], []))
-                    newly = live.update(labels, scores)
+                    newly = live.update(labels, scores, now())
                     for sid in newly:
                         st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
-                        live.save(REGISTER_DIR)
+                        live.save(REGISTER_DIR, now())
                     if newly:
                         reg_ph.dataframe(pd.DataFrame(live.register()), width="stretch", hide_index=True)
                         present_ph.metric("Present", len(live.marked))
