@@ -5,10 +5,10 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch>=2.6
 torchvision>=0.21
-ultralytics>=8.3
+ultralytics-opencv-headless>=8.4  # same Ultralytics, but with headless OpenCV (no libGL needed)
 streamlit>=1.45
 numpy>=2.1
-opencv-python>=4.10
+opencv-python-headless>=4.10,<5  # the server has no graphics libraries; OpenCV 5 is untested here
 pandas>=2.2.3,<3
 scikit-learn>=1.6
 matplotlib>=3.10
