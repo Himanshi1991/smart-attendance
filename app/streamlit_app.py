@@ -97,6 +97,27 @@ def webrtc_available() -> bool:
         return False
 
 
+# A TURN relay lets browser live video reach a server behind a firewall (such as Streamlit Community Cloud).
+# streamlit-webrtc finds one by itself from these environment variables; on Streamlit Cloud put them in the
+# app's Settings -> Secrets, e.g.  HF_TOKEN = "hf_..."  (a free Hugging Face access token).
+TURN_KEYS = ["HF_TOKEN", "CLOUDFLARE_TURN_KEY_ID", "CLOUDFLARE_TURN_KEY_API_TOKEN", "TWILIO_ACCOUNT_SID",
+             "TWILIO_AUTH_TOKEN"]
+
+
+def turn_configured() -> bool:
+    for k in TURN_KEYS:
+        if not os.environ.get(k):
+            try:
+                v = st.secrets.get(k)
+            except Exception:          # no secrets file: nothing configured
+                v = None
+            if v:
+                os.environ[k] = str(v)
+    return bool(os.environ.get("HF_TOKEN") or (os.environ.get("CLOUDFLARE_TURN_KEY_ID")
+                and os.environ.get("CLOUDFLARE_TURN_KEY_API_TOKEN"))
+                or (os.environ.get("TWILIO_ACCOUNT_SID") and os.environ.get("TWILIO_AUTH_TOKEN")))
+
+
 st.title("Smart Attendance & Classroom Engagement Analyzer")
 
 with st.sidebar:
@@ -216,7 +237,11 @@ elif mode == "Live attendance":
                     if DEMO_ROSTER.exists() else False)
         SRC_LOCAL, SRC_STREAM, SRC_PHOTO = ("This computer's camera (live video)", "Browser camera (live video)",
                                             "Browser camera (take a photo)")
+        has_turn = turn_configured()
         sources = ([] if ON_CLOUD else [SRC_LOCAL]) + ([SRC_STREAM] if webrtc_available() else []) + [SRC_PHOTO]
+        if ON_CLOUD and not has_turn and SRC_STREAM in sources:
+            # without a TURN relay, live video usually cannot reach the cloud server: start with the photo mode
+            sources = [SRC_PHOTO, SRC_STREAM]
         source = st.radio("Camera", sources, help="'This computer's camera' needs a camera attached to the computer "
                           "running the app. The browser camera works anywhere, including the online app: live video "
                           "streams it to the app; if live video does not connect (some networks block it), use "
@@ -278,9 +303,13 @@ elif mode == "Live attendance":
             return av.VideoFrame.from_ndarray(draw_live(img, faces, labels, scores, marked), format="bgr24")
 
         with left:
+            if ON_CLOUD and not has_turn:
+                st.info("Live video needs a **TURN relay** to reach the online server; without one it usually keeps "
+                        "saying *Connection is taking longer than expected*. Until one is set up (see "
+                        "docs/DEPLOY.md), use **Browser camera (take a photo)** in the sidebar.")
+            # no rtc_configuration: streamlit-webrtc then picks STUN/TURN servers itself (TURN when a key is set)
             ctx = webrtc_streamer(key="live-attendance", mode=WebRtcMode.SENDRECV, video_frame_callback=on_frame,
-                                  media_stream_constraints={"video": True, "audio": False}, async_processing=True,
-                                  rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+                                  media_stream_constraints={"video": True, "audio": False}, async_processing=True)
     frame_ph = left.empty()
     status_ph = left.empty()
     reg_ph = right.empty()
@@ -373,7 +402,7 @@ elif mode == "Live attendance":
                                           f"{len(live.marked)}/{len(roster)} present")
             finally:
                 cap.release()
-    elif not browser:
+    elif source == SRC_LOCAL:
         frame_ph.info("Turn **Camera on** to start taking attendance.")
 
 
