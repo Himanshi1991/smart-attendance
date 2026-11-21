@@ -6,7 +6,10 @@ processed frames, so a single look-alike false match never marks anyone present.
 from __future__ import annotations
 
 import csv
+import io
 import re
+import shutil
+import zipfile
 from collections import deque
 from datetime import datetime
 from pathlib import Path
@@ -85,6 +88,46 @@ def save_student_photos(roster_dir: str | Path, student_id: str, images: list[np
         ok, enc = cv2.imencode(".jpg", img)
         enc.tofile(str(d / f"{i}.jpg"))          # tofile handles non-ASCII Windows paths
     return d
+
+
+def roster_backup(roster_dir: str | Path) -> bytes:
+    """Zip of every enrolled student's photos (<student_id>/<n>.jpg): lets the online app, whose disk is wiped
+    on every restart, get its students back with `restore_roster_backup`."""
+    buf = io.BytesIO()
+    root = Path(roster_dir)
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        if root.exists():
+            for d in sorted(p for p in root.iterdir() if p.is_dir()):
+                for img in sorted(d.iterdir()):
+                    if img.suffix.lower() in IMAGE_EXTS:
+                        z.writestr(f"{d.name}/{img.name}", img.read_bytes())
+    return buf.getvalue()
+
+
+def restore_roster_backup(roster_dir: str | Path, data: bytes, max_photos: int = 20) -> list[str]:
+    """Restore students from a `roster_backup` zip; returns the restored student ids.
+
+    Only `<student_id>/<photo>` entries with a valid id and a decodable image are used (the zip is user input:
+    nothing is written from its paths directly). A restored student replaces a student with the same id.
+    """
+    photos: dict[str, list[np.ndarray]] = {}
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        for info in z.infolist():
+            parts = info.filename.replace("\\", "/").split("/")
+            if info.is_dir() or len(parts) != 2 or Path(parts[1]).suffix.lower() not in IMAGE_EXTS:
+                continue
+            sid = parts[0]
+            if not sid or safe_student_id(sid) != sid or len(photos.get(sid, [])) >= max_photos:
+                continue
+            if info.file_size > 20_000_000:
+                continue
+            img = cv2.imdecode(np.frombuffer(z.read(info), np.uint8), cv2.IMREAD_COLOR)
+            if img is not None:
+                photos.setdefault(sid, []).append(img)
+    for sid, imgs in photos.items():
+        shutil.rmtree(Path(roster_dir) / sid, ignore_errors=True)
+        save_student_photos(roster_dir, sid, imgs)
+    return sorted(photos)
 
 
 def rebuild_roster(roster_dir: str | Path, roster_file: str | Path, engine, logger=None) -> Roster:

@@ -57,3 +57,45 @@ def test_live_register_table_can_be_shown_with_present_and_absent_students(tmp_p
     pa.Table.from_pandas(pd.DataFrame(live.register()))                     # must not raise
     text = live.save(tmp_path).read_text(encoding="utf-8")
     assert "away,absent,," in text                                          # empty cells in the CSV, as before
+
+
+def _photo(seed: int) -> np.ndarray:
+    return np.random.default_rng(seed).integers(0, 255, (40, 30, 3), dtype=np.uint8)
+
+
+def test_roster_backup_restores_every_student(tmp_path):
+    from smartattend.attendance.live import restore_roster_backup, roster_backup, save_student_photos
+
+    src, dst = tmp_path / "src", tmp_path / "dst"
+    save_student_photos(src, "22CS001_Anu", [_photo(1), _photo(2), _photo(3)])
+    save_student_photos(src, "22CS002", [_photo(4), _photo(5), _photo(6)])
+    restored = restore_roster_backup(dst, roster_backup(src))
+    assert restored == ["22CS001_Anu", "22CS002"]
+    for sid in restored:
+        assert len(list((dst / sid).glob("*.jpg"))) == 3
+    # restoring again replaces, it does not duplicate the photos
+    restore_roster_backup(dst, roster_backup(src))
+    assert len(list((dst / "22CS002").glob("*.jpg"))) == 3
+
+
+def test_restore_ignores_unsafe_or_invalid_zip_entries(tmp_path):
+    import io
+    import zipfile
+
+    import cv2
+
+    from smartattend.attendance.live import restore_roster_backup
+
+    ok, jpg = cv2.imencode(".jpg", _photo(7))
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("good_id/1.jpg", jpg.tobytes())
+        z.writestr("../escape/1.jpg", jpg.tobytes())       # path traversal
+        z.writestr("a/b/1.jpg", jpg.tobytes())             # too deep
+        z.writestr("bad id!/1.jpg", jpg.tobytes())         # unsafe id
+        z.writestr("broken/1.jpg", b"not an image")        # not decodable
+        z.writestr("notes/readme.txt", b"hello")           # not a photo
+    roster_dir = tmp_path / "roster"
+    assert restore_roster_backup(roster_dir, buf.getvalue()) == ["good_id"]
+    assert sorted(p.name for p in roster_dir.iterdir()) == ["good_id"]
+    assert not (tmp_path / "escape").exists()

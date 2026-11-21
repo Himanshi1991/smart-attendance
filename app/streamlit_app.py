@@ -15,6 +15,7 @@ import shutil
 import sys
 import tempfile
 import time
+import zipfile
 from datetime import datetime
 from pathlib import Path
 
@@ -28,7 +29,8 @@ if str(_SRC) not in sys.path:          # online there is no `pip install -e .`; 
     sys.path.insert(0, str(_SRC))
 
 from smartattend.attendance.live import (LiveAttendance, check_enrolment_photo, draw_live, rebuild_roster,
-                                         safe_student_id, save_student_photos)
+                                         restore_roster_backup, roster_backup, safe_student_id,
+                                         save_student_photos)
 from smartattend.attendance.roster import Roster
 from smartattend.attendance.session import AttendanceSession, iter_frames
 from smartattend.utils import load_config
@@ -96,10 +98,6 @@ def webrtc_available() -> bool:
 
 
 st.title("Smart Attendance & Classroom Engagement Analyzer")
-if ON_CLOUD:
-    st.warning("**Online demo.** Please do not enrol real students here: anyone with the link can see this app, "
-               "and enrolled students and registers are deleted whenever the app restarts. "
-               "For real classes, run the app on the classroom computer (see README).")
 
 with st.sidebar:
     mode = st.radio("Mode", ["Live attendance", "Enroll students", "Analyze photo/video"])
@@ -175,6 +173,39 @@ if mode == "Enroll students":
             st.session_state.pop("live", None)
             st.rerun()
 
+    st.divider()
+    st.subheader("Back up / restore students")
+    st.caption("Download a backup after enrolling. If the students are ever gone (the online app's server deletes "
+               "its files when the app restarts), upload the backup here to bring them back. The backup holds the "
+               "students' photos: keep it private.")
+    k1, k2 = st.columns(2)
+    with k1:
+        if students:
+            st.download_button("Download backup of students", roster_backup(ROSTER_DIR),
+                               f"students_backup_{now():%Y-%m-%d}.zip", "application/zip")
+        else:
+            st.caption("Nothing to back up yet.")
+    with k2:
+        backup = st.file_uploader("Restore from a backup (.zip)", type=["zip"], key="restore_zip")
+        if backup is not None and st.button("Restore students", type="primary"):
+            try:
+                restored = restore_roster_backup(ROSTER_DIR, backup.getvalue())
+            except zipfile.BadZipFile:
+                restored = None
+                st.error("That file is not a valid backup .zip.")
+            if restored == []:
+                st.error("No student photos found in that file.")
+            elif restored:
+                with st.spinner("Updating roster..."):
+                    roster = rebuild_roster(ROSTER_DIR, CLASS_ROSTER, engine)
+                st.session_state.pop("live", None)
+                # rerun so the student list and backup button above include the restored students
+                st.session_state["restore_msg"] = (f"Restored {len(restored)} student(s): {', '.join(restored)}. "
+                                                   f"The roster now has {len(roster)} student(s).")
+                st.rerun()
+        if "restore_msg" in st.session_state:
+            st.success(st.session_state.pop("restore_msg"))
+
 
 # =====================================================================================  LIVE
 elif mode == "Live attendance":
@@ -214,7 +245,7 @@ elif mode == "Live attendance":
     with top[3]:
         run = source == SRC_LOCAL and st.toggle("Camera on", value=False)
         b1, b2 = st.columns(2)
-        if not ON_CLOUD and b1.button("Save register"):
+        if b1.button("Save register"):
             st.success(f"Saved {live.save(REGISTER_DIR, now())}")
         if b2.button("New session (reset)"):
             st.session_state.pop("live", None)
@@ -275,7 +306,7 @@ elif mode == "Live attendance":
             newly = live.update(labels, scores, now())
             for sid in newly:
                 st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
-            if newly and not ON_CLOUD:
+            if newly:
                 live.save(REGISTER_DIR, now())
         frame_ph.image(draw_live(frame, faces, labels, scores, set(live.marked))[:, :, ::-1], channels="RGB",
                        width="stretch")
@@ -303,9 +334,8 @@ elif mode == "Live attendance":
                 reg_ph.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
                 present_ph.metric("Present", n_marked)
                 absent_ph.metric("Absent", len(roster) - n_marked)
-                if not ON_CLOUD:
-                    with shared["lock"]:
-                        live.save(REGISTER_DIR, now())
+                with shared["lock"]:
+                    live.save(REGISTER_DIR, now())
             status_ph.caption(f"{n_faces} face(s) in view · {n_marked}/{len(roster)} present")
             time.sleep(0.5)
 
