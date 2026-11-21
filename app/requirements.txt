@@ -15,3 +15,4 @@ matplotlib>=3.10
 pyyaml>=6.0
 streamlit-webrtc>=0.60  # live video from the browser camera (WebRTC)
 tzdata  # time-zone database, so attendance times are in Indian time on the cloud server
+streamlit-camera-input-live>=0.2  # live frames from the browser over Streamlit itself: works on every network

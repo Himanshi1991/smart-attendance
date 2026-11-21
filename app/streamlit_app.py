@@ -97,6 +97,30 @@ def webrtc_available() -> bool:
         return False
 
 
+def live_frames_available() -> bool:
+    try:
+        import camera_input_live  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def relay_status() -> str:
+    """What streamlit-webrtc will use to connect: shown under the live video so a failed relay is visible."""
+    try:
+        from streamlit_webrtc.credentials import get_available_ice_servers
+        servers = get_available_ice_servers()
+    except Exception as e:                      # noqa: BLE001
+        return f"could not check the relay ({type(e).__name__})"
+    urls = [u for s in servers for u in ([s["urls"]] if isinstance(s.get("urls"), str) else s.get("urls", []))]
+    if any(str(u).startswith("turn") for u in urls):
+        return "TURN relay ready"
+    if os.environ.get("HF_TOKEN"):
+        return ("a relay key is set, but getting relay access failed: check that HF_TOKEN in Secrets is a valid, "
+                "not deleted Hugging Face token")
+    return "no relay (STUN only)"
+
+
 # A TURN relay lets browser live video reach a server behind a firewall (such as Streamlit Community Cloud).
 # streamlit-webrtc finds one by itself from these environment variables; on Streamlit Cloud put them in the
 # app's Settings -> Secrets, e.g.  HF_TOKEN = "hf_..."  (a free Hugging Face access token).
@@ -235,19 +259,21 @@ elif mode == "Live attendance":
     with st.sidebar:
         use_demo = (st.checkbox("Use the demo roster (12 LFW people) instead", value=roster is None)
                     if DEMO_ROSTER.exists() else False)
-        SRC_LOCAL, SRC_STREAM, SRC_PHOTO = ("This computer's camera (live video)", "Browser camera (live video)",
-                                            "Browser camera (take a photo)")
+        SRC_LOCAL, SRC_AUTO, SRC_STREAM, SRC_PHOTO = (
+            "This computer's camera (live video)", "Browser camera (live, 1 frame per second)",
+            "Browser camera (live video, WebRTC)", "Browser camera (take a photo)")
         has_turn = turn_configured()
-        sources = ([] if ON_CLOUD else [SRC_LOCAL]) + ([SRC_STREAM] if webrtc_available() else []) + [SRC_PHOTO]
-        if ON_CLOUD and not has_turn and SRC_STREAM in sources:
-            # without a TURN relay, live video usually cannot reach the cloud server: start with the photo mode
-            sources = [SRC_PHOTO, SRC_STREAM]
+        # SRC_AUTO sends frames over Streamlit's own connection, so it works on every network; WebRTC is smoother
+        # but needs a TURN relay to reach the online server.
+        sources = (([] if ON_CLOUD else [SRC_LOCAL]) + ([SRC_AUTO] if live_frames_available() else [])
+                   + ([SRC_STREAM] if webrtc_available() else []) + [SRC_PHOTO])
         source = st.radio("Camera", sources, help="'This computer's camera' needs a camera attached to the computer "
-                          "running the app. The browser camera works anywhere, including the online app: live video "
-                          "streams it to the app; if live video does not connect (some networks block it), use "
-                          "'take a photo'.")
+                          "running the app. The browser camera works anywhere, including the online app. "
+                          "'1 frame per second' works on every network; 'WebRTC' is smoother but some networks "
+                          "block it; 'take a photo' is one still photo at a time.")
         browser = source == SRC_PHOTO          # one still photo at a time
         stream = source == SRC_STREAM          # live video from the browser (WebRTC)
+        auto = source == SRC_AUTO              # live frames from the browser, one per second
         cam = st.number_input("Camera index", 0, 5, 0) if source == SRC_LOCAL else 0
         threshold = st.slider("Match threshold (higher = stricter)", 0.30, 0.60, float(cfg["face"]["match_threshold"]), 0.01)
     if use_demo:
@@ -280,6 +306,14 @@ elif mode == "Live attendance":
     left, right = st.columns([3, 2])
     if browser:
         shot = left.camera_input("Take a photo of the class (students facing the camera)")
+    if auto:
+        from camera_input_live import camera_input_live
+
+        with left:
+            st.caption("The camera starts by itself: allow camera access if the browser asks. A frame is checked "
+                       "every second; the video with names appears below. **Pause** stops the camera.")
+            shot = camera_input_live(debounce=1000, key="live_frames", height=300, width=400,
+                                     start_label="Start capturing", stop_label="Pause")
     if stream:
         import av
         from streamlit_webrtc import WebRtcMode, webrtc_streamer
@@ -303,10 +337,10 @@ elif mode == "Live attendance":
             return av.VideoFrame.from_ndarray(draw_live(img, faces, labels, scores, marked), format="bgr24")
 
         with left:
-            if ON_CLOUD and not has_turn:
-                st.info("Live video needs a **TURN relay** to reach the online server; without one it usually keeps "
-                        "saying *Connection is taking longer than expected*. Until one is set up (see "
-                        "docs/DEPLOY.md), use **Browser camera (take a photo)** in the sidebar.")
+            if ON_CLOUD:
+                st.caption(f"Relay: {relay_status()}. If the video keeps saying *Connection is taking longer than "
+                           "expected*, your network blocks WebRTC: use **Browser camera (live, 1 frame per "
+                           "second)** instead (see docs/DEPLOY.md).")
             # no rtc_configuration: streamlit-webrtc then picks STUN/TURN servers itself (TURN when a key is set)
             ctx = webrtc_streamer(key="live-attendance", mode=WebRtcMode.SENDRECV, video_frame_callback=on_frame,
                                   media_stream_constraints={"video": True, "audio": False}, async_processing=True)
@@ -319,19 +353,28 @@ elif mode == "Live attendance":
     elif stream:
         right.caption("Click **START** under the video and allow camera access. A student is marked present after "
                       "being recognised in 3 of 5 processed frames. Unknown faces are never stored.")
+    elif auto:
+        right.caption("A student is marked present after being recognised in 3 of 5 frames (about 3 seconds in "
+                      "view). Unknown faces are never stored.")
     else:
         right.caption("A student is marked present after being recognised in 3 of 5 consecutive frames. "
                       "Unknown faces are never stored. The register is auto-saved to reports/attendance/.")
 
-    if browser and shot is not None:
+    if (browser or auto) and shot is not None:
         data = shot.getvalue()
         digest = hashlib.sha1(data).hexdigest()
         frame = decode(data)
         engine = get_engine()
         faces = engine.analyze(frame)
         labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold) if faces else ([], []))
-        if st.session_state.get("last_photo") != digest:     # a rerun shows the same photo again: count it once
+        # A rerun (e.g. after moving a slider) delivers the same image again: count each capture once. Photos: by
+        # content. Live frames arrive once a second and a still scene can give identical frames, so a frame
+        # counts when it differs OR when a second has passed since the last counted one.
+        fresh = st.session_state.get("last_photo") != digest or (
+            auto and time.time() - st.session_state.get("last_frame_t", 0.0) >= 0.9)
+        if fresh:
             st.session_state["last_photo"] = digest
+            st.session_state["last_frame_t"] = time.time()
             newly = live.update(labels, scores, now())
             for sid in newly:
                 st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
@@ -340,7 +383,7 @@ elif mode == "Live attendance":
         frame_ph.image(draw_live(frame, faces, labels, scores, set(live.marked))[:, :, ::-1], channels="RGB",
                        width="stretch")
         known = sum(l is not None for l in labels)
-        status_ph.caption(f"{len(faces)} face(s) in the photo · {known} recognised · "
+        status_ph.caption(f"{len(faces)} face(s) {'in view' if auto else 'in the photo'} · {known} recognised · "
                           f"{len(live.marked)}/{len(roster)} present")
     elif browser:
         frame_ph.info("Click **Take Photo** above. Allow camera access if your browser asks.")
