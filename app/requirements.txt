@@ -1,13 +1,15 @@
 # Packages for the online app (Streamlit Community Cloud reads this file because it sits next to streamlit_app.py).
 # CPU-only PyTorch: much smaller than the default build, and the cloud server has no GPU.
+# Versions are ranges, not exact pins, so ready-made wheels exist for whichever Python the server uses
+# (exact pins forced numpy/pandas/matplotlib to be compiled from source on a newer Python: very slow).
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.15.0+cpu
-torchvision==0.29.2+cpu
-ultralytics==8.4.194
-streamlit==1.66.1
-numpy==2.2.5
-opencv-python==4.13.0.92
-pandas==2.2.3
-scikit-learn==1.7.2
-matplotlib==3.10.1
-pyyaml==6.0.3
+torch>=2.6
+torchvision>=0.21
+ultralytics>=8.3
+streamlit>=1.45
+numpy>=2.1
+opencv-python>=4.10
+pandas>=2.2.3,<3
+scikit-learn>=1.6
+matplotlib>=3.10
+pyyaml>=6.0
