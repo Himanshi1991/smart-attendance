@@ -9,6 +9,7 @@ viewer's browser camera, because the cloud server has no camera of its own.
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import os
 import shutil
@@ -23,6 +24,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 _SRC = Path(__file__).resolve().parents[1] / "src"
 if str(_SRC) not in sys.path:          # online there is no `pip install -e .`; import the package from src/
@@ -89,57 +91,25 @@ def register_download(rows: list[dict], key: str) -> None:
                        f"attendance_{now():%Y-%m-%d}.csv", "text/csv", key=key)
 
 
-def webrtc_available() -> bool:
-    try:
-        import streamlit_webrtc  # noqa: F401
-        return True
-    except ImportError:
-        return False
+# Live camera in the browser (app/components/live_camera): smooth local preview, frames sent to the app over
+# Streamlit's own connection, face boxes drawn back on the video. Works locally and online, on any network.
+_live_camera = components.declare_component("live_camera",
+                                            path=str(Path(__file__).resolve().parent / "components" / "live_camera"))
 
 
-def live_frames_available() -> bool:
-    try:
-        import camera_input_live  # noqa: F401
-        return True
-    except ImportError:
-        return False
-
-
-def relay_status() -> str:
-    """What streamlit-webrtc will use to connect: shown under the live video so a failed relay is visible."""
-    try:
-        from streamlit_webrtc.credentials import get_available_ice_servers
-        servers = get_available_ice_servers()
-    except Exception as e:                      # noqa: BLE001
-        return f"could not check the relay ({type(e).__name__})"
-    urls = [u for s in servers for u in ([s["urls"]] if isinstance(s.get("urls"), str) else s.get("urls", []))]
-    if any(str(u).startswith("turn") for u in urls):
-        return "TURN relay ready"
-    if os.environ.get("HF_TOKEN"):
-        return ("a relay key is set, but getting relay access failed: check that HF_TOKEN in Secrets is a valid, "
-                "not deleted Hugging Face token")
-    return "no relay (STUN only)"
-
-
-# A TURN relay lets browser live video reach a server behind a firewall (such as Streamlit Community Cloud).
-# streamlit-webrtc finds one by itself from these environment variables; on Streamlit Cloud put them in the
-# app's Settings -> Secrets, e.g.  HF_TOKEN = "hf_..."  (a free Hugging Face access token).
-TURN_KEYS = ["HF_TOKEN", "CLOUDFLARE_TURN_KEY_ID", "CLOUDFLARE_TURN_KEY_API_TOKEN", "TWILIO_ACCOUNT_SID",
-             "TWILIO_AUTH_TOKEN"]
-
-
-def turn_configured() -> bool:
-    for k in TURN_KEYS:
-        if not os.environ.get(k):
-            try:
-                v = st.secrets.get(k)
-            except Exception:          # no secrets file: nothing configured
-                v = None
-            if v:
-                os.environ[k] = str(v)
-    return bool(os.environ.get("HF_TOKEN") or (os.environ.get("CLOUDFLARE_TURN_KEY_ID")
-                and os.environ.get("CLOUDFLARE_TURN_KEY_API_TOKEN"))
-                or (os.environ.get("TWILIO_ACCOUNT_SID") and os.environ.get("TWILIO_AUTH_TOKEN")))
+def face_boxes(faces, labels, scores, marked: set[str]) -> list[dict]:
+    """Boxes for the live camera overlay, coloured like draw_live (green present, orange confirming, red unknown)."""
+    out = []
+    for f, lbl, sc in zip(faces, labels, scores):
+        x, y, w, h = (int(v) for v in f.box)
+        if lbl is None:
+            color, text = "#e00000", f"unknown {sc:.2f}"
+        elif lbl in marked:
+            color, text = "#00a000", f"{lbl}  PRESENT"
+        else:
+            color, text = "#f0a000", f"{lbl}  confirming..."
+        out.append({"x": x, "y": y, "w": w, "h": h, "color": color, "text": text})
+    return out
 
 
 st.title("Smart Attendance & Classroom Engagement Analyzer")
@@ -259,21 +229,14 @@ elif mode == "Live attendance":
     with st.sidebar:
         use_demo = (st.checkbox("Use the demo roster (12 LFW people) instead", value=roster is None)
                     if DEMO_ROSTER.exists() else False)
-        SRC_LOCAL, SRC_AUTO, SRC_STREAM, SRC_PHOTO = (
-            "This computer's camera (live video)", "Browser camera (live, 1 frame per second)",
-            "Browser camera (live video, WebRTC)", "Browser camera (take a photo)")
-        has_turn = turn_configured()
-        # SRC_AUTO sends frames over Streamlit's own connection, so it works on every network; WebRTC is smoother
-        # but needs a TURN relay to reach the online server.
-        sources = (([] if ON_CLOUD else [SRC_LOCAL]) + ([SRC_AUTO] if live_frames_available() else [])
-                   + ([SRC_STREAM] if webrtc_available() else []) + [SRC_PHOTO])
-        source = st.radio("Camera", sources, help="'This computer's camera' needs a camera attached to the computer "
-                          "running the app. The browser camera works anywhere, including the online app. "
-                          "'1 frame per second' works on every network; 'WebRTC' is smoother but some networks "
-                          "block it; 'take a photo' is one still photo at a time.")
+        SRC_LOCAL, SRC_LIVE, SRC_PHOTO = ("This computer's camera (live video)", "Browser camera (live video)",
+                                          "Browser camera (take a photo)")
+        sources = ([] if ON_CLOUD else [SRC_LOCAL]) + [SRC_LIVE, SRC_PHOTO]
+        source = st.radio("Camera", sources, help="'This computer's camera' uses a camera attached to the computer "
+                          "running the app. The browser camera works anywhere, including the online app: live "
+                          "video, or one still photo at a time.")
         browser = source == SRC_PHOTO          # one still photo at a time
-        stream = source == SRC_STREAM          # live video from the browser (WebRTC)
-        auto = source == SRC_AUTO              # live frames from the browser, one per second
+        live_video = source == SRC_LIVE        # live video from the browser (component)
         cam = st.number_input("Camera index", 0, 5, 0) if source == SRC_LOCAL else 0
         threshold = st.slider("Match threshold (higher = stricter)", 0.30, 0.60, float(cfg["face"]["match_threshold"]), 0.01)
     if use_demo:
@@ -288,128 +251,110 @@ elif mode == "Live attendance":
         st.session_state["live"] = (LiveAttendance(roster, confirm_hits=1, window=1) if browser
                                     else LiveAttendance(roster, confirm_hits=3, window=5))
         st.session_state["live_key"] = key
+        st.session_state.pop("cam_boxes", None)
     live: LiveAttendance = st.session_state["live"]
+
+    def count_recognitions(labels, scores):
+        newly = live.update(labels, scores, now())
+        for sid in newly:
+            st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
+        if newly:
+            live.save(REGISTER_DIR, now())
+
+    if live_video:
+        # The component's latest frame is in session_state before anything is drawn: process it FIRST, so the
+        # counts, register and boxes drawn in this run already include it (frames arrive several times a second;
+        # drawing first and filling in later would leave those parts blank most of the time). Each frame has an
+        # id and is counted once.
+        frame_msg = st.session_state.get("live_cam")
+        if isinstance(frame_msg, dict) and frame_msg.get("id") and frame_msg["id"] != st.session_state.get("cam_ack"):
+            frame = decode(base64.b64decode(frame_msg["image"].split(",", 1)[1]))
+            if frame is not None:
+                faces = get_engine().analyze(frame)
+                labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold)
+                                  if faces else ([], []))
+                count_recognitions(labels, scores)
+                t = time.time()
+                st.session_state["cam_fps"] = 1.0 / max(t - st.session_state.get("cam_t", t - 1.0), 1e-3)
+                st.session_state["cam_t"] = t
+                st.session_state["cam_boxes"] = {
+                    "boxes": face_boxes(faces, labels, scores, set(live.marked)),
+                    "frame_w": int(frame.shape[1]), "frame_h": int(frame.shape[0]),
+                    "status": (f"{len(faces)} face(s) in view · {sum(l is not None for l in labels)} recognised · "
+                               f"{len(live.marked)}/{len(roster)} present")}
+            st.session_state["cam_ack"] = frame_msg["id"]
+
 
     top = st.columns([1, 1, 1, 2])
     top[0].metric("Enrolled", len(roster))
-    present_ph, absent_ph = top[1].empty(), top[2].empty()      # filled at the end, after any new photo is counted
+    present_ph, absent_ph = top[1].empty(), top[2].empty()      # filled at the end, after any new frame is counted
     with top[3]:
-        run = source == SRC_LOCAL and st.toggle("Camera on", value=False)
+        # the same "Camera on" switch for this computer's camera and for the browser's live camera
+        cam_on = source in (SRC_LOCAL, SRC_LIVE) and st.toggle("Camera on", value=False)
+        run = source == SRC_LOCAL and cam_on
+        if live_video and not cam_on:
+            st.session_state.pop("cam_boxes", None)      # no stale boxes / status when the camera is off
         b1, b2 = st.columns(2)
         if b1.button("Save register"):
             st.success(f"Saved {live.save(REGISTER_DIR, now())}")
         if b2.button("New session (reset)"):
             st.session_state.pop("live", None)
             st.session_state.pop("last_photo", None)
+            st.session_state.pop("cam_boxes", None)
             st.rerun()
 
     left, right = st.columns([3, 2])
     if browser:
         shot = left.camera_input("Take a photo of the class (students facing the camera)")
-    if auto:
-        from camera_input_live import camera_input_live
-
-        with left:
-            st.caption("The camera starts by itself: allow camera access if the browser asks. A frame is checked "
-                       "every second; the video with names appears below. **Pause** stops the camera.")
-            shot = camera_input_live(debounce=1000, key="live_frames", height=300, width=400,
-                                     start_label="Start capturing", stop_label="Pause")
-    if stream:
-        import av
-        from streamlit_webrtc import WebRtcMode, webrtc_streamer
-
-        engine = get_engine()
-        # The video callback runs in another thread: it may not touch st.* or st.session_state, so it gets plain
-        # objects through this closure, shared with the page under a lock.
-        shared = st.session_state.setdefault("stream_shared", {"lock": __import__("threading").Lock()})
-        shared.update(live=live, roster=roster, threshold=threshold, newly=shared.get("newly", []), faces=0)
-
-        def on_frame(frame: "av.VideoFrame") -> "av.VideoFrame":
-            img = frame.to_ndarray(format="bgr24")
-            faces = engine.analyze(img)
-            labels, scores = (shared["roster"].match(np.stack([f.embedding for f in faces]), shared["threshold"])
-                              if faces else ([], []))
-            with shared["lock"]:
-                newly = shared["live"].update(labels, scores, now())
-                shared["newly"].extend(newly)
-                shared["faces"] = len(faces)
-                marked = set(shared["live"].marked)
-            return av.VideoFrame.from_ndarray(draw_live(img, faces, labels, scores, marked), format="bgr24")
-
-        with left:
-            if ON_CLOUD:
-                st.caption(f"Relay: {relay_status()}. If the video keeps saying *Connection is taking longer than "
-                           "expected*, your network blocks WebRTC: use **Browser camera (live, 1 frame per "
-                           "second)** instead (see docs/DEPLOY.md).")
-            # no rtc_configuration: streamlit-webrtc then picks STUN/TURN servers itself (TURN when a key is set)
-            ctx = webrtc_streamer(key="live-attendance", mode=WebRtcMode.SENDRECV, video_frame_callback=on_frame,
-                                  media_stream_constraints={"video": True, "audio": False}, async_processing=True)
+    cam_slot = left.container()          # the live camera is drawn here at the END of the run (see below)
     frame_ph = left.empty()
     status_ph = left.empty()
     reg_ph = right.empty()
     if browser:
         right.caption("Every enrolled student recognised in a photo is marked present. Take more photos to catch "
                       "students who were turned away. Unknown faces are never stored.")
-    elif stream:
-        right.caption("Click **START** under the video and allow camera access. A student is marked present after "
-                      "being recognised in 3 of 5 processed frames. Unknown faces are never stored.")
-    elif auto:
-        right.caption("A student is marked present after being recognised in 3 of 5 frames (about 3 seconds in "
-                      "view). Unknown faces are never stored.")
+    elif live_video:
+        right.caption("Turn **Camera on** and allow camera access when the browser asks. A student is marked "
+                      "present after being recognised in 3 of 5 consecutive frames. Unknown faces are never stored.")
     else:
         right.caption("A student is marked present after being recognised in 3 of 5 consecutive frames. "
                       "Unknown faces are never stored. The register is auto-saved to reports/attendance/.")
 
-    if (browser or auto) and shot is not None:
+    if browser and shot is not None:
         data = shot.getvalue()
         digest = hashlib.sha1(data).hexdigest()
         frame = decode(data)
         engine = get_engine()
         faces = engine.analyze(frame)
         labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold) if faces else ([], []))
-        # A rerun (e.g. after moving a slider) delivers the same image again: count each capture once. Photos: by
-        # content. Live frames arrive once a second and a still scene can give identical frames, so a frame
-        # counts when it differs OR when a second has passed since the last counted one.
-        fresh = st.session_state.get("last_photo") != digest or (
-            auto and time.time() - st.session_state.get("last_frame_t", 0.0) >= 0.9)
-        if fresh:
+        if st.session_state.get("last_photo") != digest:     # a rerun shows the same photo again: count it once
             st.session_state["last_photo"] = digest
-            st.session_state["last_frame_t"] = time.time()
-            newly = live.update(labels, scores, now())
-            for sid in newly:
-                st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
-            if newly:
-                live.save(REGISTER_DIR, now())
+            count_recognitions(labels, scores)
         frame_ph.image(draw_live(frame, faces, labels, scores, set(live.marked))[:, :, ::-1], channels="RGB",
                        width="stretch")
         known = sum(l is not None for l in labels)
-        status_ph.caption(f"{len(faces)} face(s) {'in view' if auto else 'in the photo'} · {known} recognised · "
+        status_ph.caption(f"{len(faces)} face(s) in the photo · {known} recognised · "
                           f"{len(live.marked)}/{len(roster)} present")
     elif browser:
         frame_ph.info("Click **Take Photo** above. Allow camera access if your browser asks.")
+    if live_video and "cam_boxes" in st.session_state:
+        status_ph.caption(st.session_state["cam_boxes"]["status"] +
+                          f" · {st.session_state.get('cam_fps', 0):.1f} frames/s checked")
     present_ph.metric("Present", len(live.marked))
     absent_ph.metric("Absent", len(roster) - len(live.marked))
     reg_ph.dataframe(pd.DataFrame(live.register()), width="stretch", hide_index=True)
     with right:
         register_download(live.register(), "live_register")
 
-    if stream and ctx.state.playing:
-        # keep the counts and register on the page in step with the video thread
-        while ctx.state.playing:
-            with shared["lock"]:
-                newly, shared["newly"] = shared["newly"], []
-                n_faces, rows, n_marked = shared["faces"], live.register(), len(live.marked)
-                times = {sid: live.marked[sid]["time"] for sid in newly}
-            for sid in newly:
-                st.toast(f"{sid} marked present at {times[sid]}")
-            if newly:
-                reg_ph.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
-                present_ph.metric("Present", n_marked)
-                absent_ph.metric("Absent", len(roster) - n_marked)
-                with shared["lock"]:
-                    live.save(REGISTER_DIR, now())
-            status_ph.caption(f"{n_faces} face(s) in view · {n_marked}/{len(roster)} present")
-            time.sleep(0.5)
+    if live_video and cam_on:
+        # Drawn last: the component sends its next frame as soon as it sees this ack, which starts a new run; by
+        # then the counts and register above are already on the page. Switching "Camera on" off removes the
+        # component, which stops the browser camera.
+        boxes = st.session_state.get("cam_boxes", {})
+        with cam_slot:
+            _live_camera(key="live_cam", default=None, ack=st.session_state.get("cam_ack"),
+                         boxes=boxes.get("boxes", []), frame_w=boxes.get("frame_w"), frame_h=boxes.get("frame_h"),
+                         capture_width=640, controls=False)
 
     if run:
         engine = get_engine()
@@ -445,7 +390,7 @@ elif mode == "Live attendance":
                                           f"{len(live.marked)}/{len(roster)} present")
             finally:
                 cap.release()
-    elif source == SRC_LOCAL:
+    elif source in (SRC_LOCAL, SRC_LIVE) and not cam_on:
         frame_ph.info("Turn **Camera on** to start taking attendance.")
 
 
