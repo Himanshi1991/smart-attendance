@@ -1,0 +1,276 @@
+{
+  "class_counts": {
+    "train": [
+      1756,
+      448,
+      70
+    ],
+    "val": [
+      954,
+      143,
+      70
+    ],
+    "test": [
+      421,
+      646,
+      92
+    ]
+  },
+  "majority_baseline": {
+    "accuracy": 0.363244176013805,
+    "macro_f1": 0.17763713080168775,
+    "precision": [
+      0.363244176013805,
+      0.0,
+      0.0
+    ],
+    "recall": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "f1": [
+      0.5329113924050632,
+      0.0,
+      0.0
+    ],
+    "confusion": [
+      [
+        421,
+        0,
+        0
+      ],
+      [
+        646,
+        0,
+        0
+      ],
+      [
+        92,
+        0,
+        0
+      ]
+    ]
+  },
+  "experiments": {
+    "raw_pixels": {
+      "numpy_mlp": {
+        "test": {
+          "accuracy": 0.49784296807592754,
+          "macro_f1": 0.38504840550246433,
+          "precision": [
+            0.4157303370786517,
+            0.6444906444906445,
+            0.14545454545454545
+          ],
+          "recall": [
+            0.6152019002375297,
+            0.47987616099071206,
+            0.08695652173913043
+          ],
+          "f1": [
+            0.49616858237547906,
+            0.5501330967169478,
+            0.108843537414966
+          ],
+          "confusion": [
+            [
+              259,
+              142,
+              20
+            ],
+            [
+              309,
+              310,
+              27
+            ],
+            [
+              55,
+              29,
+              8
+            ]
+          ]
+        },
+        "val_macro_f1": 0.37365655591227115,
+        "train_macro_f1_at_best": 0.7896534105334795,
+        "best_epoch": 7,
+        "train_seconds": 40.3,
+        "hyperparameters": {
+          "hidden": [
+            128,
+            64
+          ],
+          "epochs": 40,
+          "lr": 0.01,
+          "momentum": 0.9,
+          "batch": 64,
+          "l2": 0.001,
+          "dropout": 0.3,
+          "input": "32x32 grayscale, standardized",
+          "sampling": "class-balanced"
+        },
+        "n_parameters": 139651
+      },
+      "keras_mlp": {
+        "test": {
+          "accuracy": 0.5012942191544435,
+          "macro_f1": 0.38005385717490175,
+          "precision": [
+            0.4234375,
+            0.6565874730021598,
+            0.10714285714285714
+          ],
+          "recall": [
+            0.6437054631828979,
+            0.47058823529411764,
+            0.06521739130434782
+          ],
+          "f1": [
+            0.5108388312912348,
+            0.5482416591523895,
+            0.08108108108108107
+          ],
+          "confusion": [
+            [
+              271,
+              129,
+              21
+            ],
+            [
+              313,
+              304,
+              29
+            ],
+            [
+              56,
+              30,
+              6
+            ]
+          ]
+        },
+        "val_macro_f1": 0.3750491970776284,
+        "best_epoch": 7,
+        "train_seconds": 63.2,
+        "n_parameters": 139651
+      }
+    },
+    "resnet18_features": {
+      "numpy_mlp": {
+        "test": {
+          "accuracy": 0.5720448662640207,
+          "macro_f1": 0.44173243215085695,
+          "precision": [
+            0.5259593679458239,
+            0.6446153846153846,
+            0.16666666666666666
+          ],
+          "recall": [
+            0.5534441805225653,
+            0.6486068111455109,
+            0.11956521739130435
+          ],
+          "f1": [
+            0.5393518518518519,
+            0.6466049382716049,
+            0.13924050632911392
+          ],
+          "confusion": [
+            [
+              233,
+              182,
+              6
+            ],
+            [
+              178,
+              419,
+              49
+            ],
+            [
+              32,
+              49,
+              11
+            ]
+          ]
+        },
+        "val_macro_f1": 0.3773595441893743,
+        "train_macro_f1_at_best": 0.6409273492926891,
+        "best_epoch": 1,
+        "train_seconds": 12.5,
+        "hyperparameters": {
+          "hidden": [
+            64
+          ],
+          "epochs": 40,
+          "lr": 0.005,
+          "momentum": 0.9,
+          "batch": 64,
+          "l2": 0.01,
+          "dropout": 0.5,
+          "input": "32x32 grayscale, standardized",
+          "sampling": "class-balanced"
+        },
+        "n_parameters": 33027
+      },
+      "keras_mlp": {
+        "test": {
+          "accuracy": 0.5962036238136325,
+          "macro_f1": 0.43657541574145436,
+          "precision": [
+            0.5324675324675324,
+            0.6576980568011959,
+            0.17857142857142858
+          ],
+          "recall": [
+            0.5843230403800475,
+            0.6811145510835913,
+            0.05434782608695652
+          ],
+          "f1": [
+            0.5571913929784824,
+            0.6692015209125475,
+            0.08333333333333333
+          ],
+          "confusion": [
+            [
+              246,
+              171,
+              4
+            ],
+            [
+              187,
+              440,
+              19
+            ],
+            [
+              29,
+              58,
+              5
+            ]
+          ]
+        },
+        "val_macro_f1": 0.3729058526935635,
+        "best_epoch": 2,
+        "train_seconds": 34.8,
+        "n_parameters": 33027
+      }
+    }
+  },
+  "framework_gradients": {
+    "numpy": {
+      "loss": 1.0590666939411948
+    },
+    "pytorch": {
+      "loss": 1.0590666939441287,
+      "max_grad_diff": 3.469446951953614e-17
+    },
+    "tensorflow": {
+      "loss": 1.059066693944129,
+      "max_grad_diff": 5.551115123125783e-17
+    }
+  },
+  "figures": [
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\nnfund\\mlp_crops_training.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\nnfund\\activations_step_sigmoid_tanh.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\nnfund\\neuron_decision_boundaries.png"
+  ]
+}

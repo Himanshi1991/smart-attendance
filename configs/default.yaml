@@ -1,0 +1,49 @@
+# Default configuration for Smart Attendance. Every run logs the config it used.
+seed: 42
+
+paths:
+  data_raw: data/raw
+  data_processed: data/processed
+  eval_dir: reports/eval
+  models_dir: models
+  roster_dir: data/roster          # data/roster/<student_id>/*.jpg
+  roster_file: models/roster.npz
+  figures_dir: reports/figures
+  experiments_dir: reports/experiments
+  logs_dir: logs
+
+face:
+  detector_score_threshold: 0.8    # YuNet face confidence
+  nms_threshold: 0.3
+  # SFace cosine-similarity threshold; 0.363 is the value recommended by the model authors.
+  match_threshold: 0.363
+
+product:
+  # chosen from the detection benchmark (reports/experiments/detection): best mAP@0.5 (0.816) and
+  # mAP@[.5:.95] (0.599) among CPU-viable models; Faster R-CNN counts slightly better but is 10x slower.
+  detector: yolov8s
+  person_threshold: 0.30           # count threshold selected on the VALIDATION split for yolov8s
+
+engagement_epochs: 6
+
+engagement_states:
+  # attentive / distracted / inactive per student (see pipeline.engagement_state)
+  # inactive   = alertness classifier says 'disengaged'
+  # distracted = alert but head turned >= this |nose offset| / eye distance (0.30 ~ 30 deg yaw)
+  distracted_head_turn: 0.30
+  min_face_px: 30                  # smaller faces are 'unclear': too few pixels to judge alertness
+
+attendance:
+  sample_every_n_frames: 10        # process 1 of every N video frames
+  min_frames_present: 2            # a student must be recognised in >= N sampled frames ...
+  min_fraction_present: 0.5        # ... and in >= this fraction of them; in between -> "review" for the teacher
+
+nnfund:
+  hidden_sizes: [32, 16]
+  activation: relu
+  init: he
+  epochs: 60
+  lr: 0.05
+  momentum: 0.9
+  batch_size: 32
+  n_samples: 1200

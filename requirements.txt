@@ -1,0 +1,13 @@
+numpy>=1.26
+opencv-python>=4.8
+matplotlib>=3.7
+pyyaml>=6.0
+pandas>=2.0
+scikit-learn>=1.3
+pytest>=8.0
+# Vision / deep-learning stage (install when reaching step 7):
+# torch>=2.2
+# torchvision>=0.17
+# tensorflow-cpu>=2.16   # optional: Keras comparison in Requirement 4 (python -m smartattend neurons); Colab has it already
+# ultralytics>=8.2
+# streamlit>=1.35

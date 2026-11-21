@@ -1,0 +1,24 @@
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+logs/
+
+# Personal data: enrolled students' photos, face embeddings and attendance registers
+data/roster/*/
+models/roster.npz
+reports/attendance/
+reports/attendance*.csv
+reports/annotated/
+
+# Datasets: large, and their licences do not allow re-distribution (download them with the guide in docs/guide/02_datasets.md)
+data/raw/
+data/processed/
+data/demo/
+reports/demo/
+
+# Trained models and caches: too large for GitHub (several files are over 100 MB); re-create them with the commands in the guides
+models/*
+!models/README.md
+reports/experiments/
+reports/logs/

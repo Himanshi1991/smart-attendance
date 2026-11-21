@@ -1,0 +1,119 @@
+[
+  {
+    "id": "R1",
+    "stakeholder": "Teacher",
+    "metric": "attendance recall",
+    "target": ">= 0.95",
+    "measured": 0.994,
+    "status": "PASS",
+    "how": "python -m smartattend stage face"
+  },
+  {
+    "id": "R2",
+    "stakeholder": "Teacher",
+    "metric": "false-present rate",
+    "target": "<= 0.02",
+    "measured": 0.001,
+    "status": "PASS",
+    "how": "python -m smartattend stage face"
+  },
+  {
+    "id": "R3",
+    "stakeholder": "Admin",
+    "metric": "stranger false-accept rate (FAR)",
+    "target": "<= 0.01",
+    "measured": 0.0010833333333333333,
+    "status": "PASS",
+    "how": "python -m smartattend stage face"
+  },
+  {
+    "id": "R4",
+    "stakeholder": "Students",
+    "metric": "max attendance-recall gap (gender, ethnicity)",
+    "target": "<= 0.05",
+    "measured": 0.006957328385899797,
+    "status": "PASS",
+    "how": "python -m smartattend stage face"
+  },
+  {
+    "id": "R5",
+    "stakeholder": "Teacher",
+    "metric": "person detection mAP@0.5",
+    "target": ">= 0.8",
+    "measured": 0.8163686862382074,
+    "status": "PASS",
+    "how": "python -m smartattend stage detection"
+  },
+  {
+    "id": "R6",
+    "stakeholder": "Teacher",
+    "metric": "count error (MAE, fully annotated images)",
+    "target": "<= 1 people",
+    "measured": 0.9882352941176471,
+    "status": "PASS",
+    "how": "python -m smartattend stage detection"
+  },
+  {
+    "id": "R7",
+    "stakeholder": "Teacher",
+    "metric": "engagement macro-F1 (5-fold CV)",
+    "target": ">= 0.65",
+    "measured": 0.7108751028232045,
+    "status": "PASS",
+    "how": "python -m smartattend stage engagement_cv"
+  },
+  {
+    "id": "R8",
+    "stakeholder": "IT",
+    "metric": "CPU latency per frame, p95",
+    "target": "<= 500 ms",
+    "measured": 2014.867425000555,
+    "status": "FAIL",
+    "how": "python -m smartattend stage pipeline_latency"
+  },
+  {
+    "id": "R9",
+    "stakeholder": "IT",
+    "metric": "peak memory",
+    "target": "<= 2000 MB",
+    "measured": 792.666112,
+    "status": "PASS",
+    "how": "python -m smartattend stage pipeline_latency"
+  },
+  {
+    "id": "R10",
+    "stakeholder": "Teacher",
+    "metric": "count error, classroom video (MAE)",
+    "target": "<= 2 students",
+    "measured": 1.4588235294117646,
+    "status": "PASS",
+    "how": "python -m smartattend evaluate"
+  },
+  {
+    "id": "R11",
+    "stakeholder": "Teacher",
+    "metric": "state macro-F1, classroom video",
+    "target": ">= 0.6",
+    "measured": 0.46707229497185104,
+    "status": "FAIL",
+    "how": "python -m smartattend evaluate"
+  },
+  {
+    "id": "R12",
+    "stakeholder": "Students",
+    "metric": "detection recall gap, small vs large",
+    "target": "<= 0.15",
+    "measured": 0.34507504250846827,
+    "status": "FAIL",
+    "how": "python -m smartattend evaluate"
+  },
+  {
+    "id": "R13",
+    "stakeholder": "IT",
+    "metric": "mAP50 lost in low light",
+    "target": "<= 0.05",
+    "measured": 4.425716471734287e-05,
+    "status": "PASS",
+    "how": "python -m smartattend evaluate"
+  }
+]

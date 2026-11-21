@@ -1,0 +1,247 @@
+{
+  "windows": {
+    "train": 157,
+    "early_stop": 22,
+    "test": 85
+  },
+  "history_frames": 8,
+  "temporal": {
+    "current frame only (app output)": {
+      "mae": 0.3259559830321985,
+      "corr": 0.6114004468734934
+    },
+    "moving average of last 8 frames": {
+      "mae": 0.3244441813405822,
+      "corr": 0.6410434386791066
+    },
+    "ridge regression on the window": {
+      "mae": 0.2175671513466274,
+      "corr": 0.6976044176993795
+    },
+    "LSTM (tanh cell)": {
+      "mae": [
+        0.41355164680410833,
+        0.056813043249815884
+      ],
+      "corr": [
+        0.6363022397959813,
+        0.02436806608257521
+      ]
+    },
+    "LSTM (sigmoid cell)": {
+      "mae": [
+        0.5027891097173971,
+        0.021305476190937672
+      ],
+      "corr": [
+        0.4257802751841927,
+        0.33747980637130914
+      ]
+    },
+    "LSTM (step cell)": {
+      "mae": [
+        0.4552109656439107,
+        0.051037826899397974
+      ],
+      "corr": [
+        0.36051390677621864,
+        0.24105448528560258
+      ]
+    },
+    "Transformer (1 block, 2 heads)": {
+      "mae": [
+        0.3459740200288156,
+        0.16518779827589652
+      ],
+      "corr": [
+        0.34343604626764046,
+        0.5145169693566902
+      ]
+    },
+    "Keras LSTM (TensorFlow, tanh)": {
+      "mae": [
+        0.5240916219704291,
+        0.042786123835862146
+      ],
+      "corr": [
+        0.41842623835988424,
+        0.2577432563216292
+      ]
+    }
+  },
+  "leave_one_video_out": {
+    "per_video": {
+      "taimoor-class-2": {
+        "true_mean_share": 0.9430791139602661,
+        "frames": 118,
+        "current frame only": 0.057465698570013046,
+        "ridge regression": 0.13460880517959595,
+        "LSTM (tanh)": 0.18369615574677786,
+        "Transformer": 0.1373550146818161
+      },
+      "taimoor-class-3": {
+        "true_mean_share": 0.22579367458820343,
+        "frames": 20,
+        "current frame only": 0.6784523725509644,
+        "ridge regression": 0.6407332420349121,
+        "LSTM (tanh)": 0.7502959767977396,
+        "Transformer": 0.6579872171084086
+      },
+      "taimoor-class-4": {
+        "true_mean_share": 0.852673351764679,
+        "frames": 19,
+        "current frame only": 0.1146407499909401,
+        "ridge regression": 0.2213607281446457,
+        "LSTM (tanh)": 0.2019099841515223,
+        "Transformer": 0.14596564571062723
+      },
+      "taimoor-class-5": {
+        "true_mean_share": 0.8695886731147766,
+        "frames": 22,
+        "current frame only": 0.1097402572631836,
+        "ridge regression": 0.33325502276420593,
+        "LSTM (tanh)": 0.29406843582789105,
+        "Transformer": 0.25094636778036755
+      }
+    },
+    "mean_mae": {
+      "current frame only": 0.24007476959377527,
+      "ridge regression": 0.3324894495308399,
+      "LSTM (tanh)": 0.35749263813098275,
+      "Transformer": 0.29806356132030487
+    }
+  },
+  "training_share_by_video": {
+    "taimoor-class-2": {
+      "frames": 118,
+      "mean_true_share": 0.9430790960451978
+    },
+    "taimoor-class-3": {
+      "frames": 20,
+      "mean_true_share": 0.22579365079365074
+    },
+    "taimoor-class-4": {
+      "frames": 19,
+      "mean_true_share": 0.852673350041771
+    },
+    "taimoor-class-5": {
+      "frames": 22,
+      "mean_true_share": 0.8695887445887446
+    }
+  },
+  "set_models": {
+    "mean p(attentive)": {
+      "mae": 0.292907476337517,
+      "corr": 0.6355078081148747
+    },
+    "share predicted attentive": {
+      "mae": 0.3259559830321985,
+      "corr": 0.6114004468734934
+    },
+    "DeepSets (no attention)": {
+      "mae": [
+        0.49776967692024565,
+        0.012188378702135757
+      ],
+      "corr": [
+        0.6533591091232175,
+        0.013041830273971268
+      ]
+    },
+    "Transformer over students": {
+      "mae": [
+        0.4766668109157505,
+        0.013551084589935307
+      ],
+      "corr": [
+        0.6058702552796901,
+        0.034579889436954225
+      ]
+    }
+  },
+  "student_attention_corr": {
+    "p(attentive)": -0.5277678097867963,
+    "p(distracted)": 0.5367289644308847,
+    "p(inactive)": 0.020291929295023138,
+    "x": -0.27651242018609323,
+    "y": 0.3743011148747177,
+    "width": 0.29686764400844334,
+    "height": 0.25110868871640724
+  },
+  "student_attention_spread": {
+    "max_over_uniform": 1.0138944466324413,
+    "min_over_uniform": 0.7788769374875462
+  },
+  "temporal_attention_mean_per_step": [
+    0.12448984384536743,
+    0.12463461607694626,
+    0.12457217276096344,
+    0.12450788915157318,
+    0.12441075593233109,
+    0.12447410076856613,
+    0.12444744259119034,
+    0.12846308946609497
+  ],
+  "latent": {
+    "resnet_embedding_5nn_accuracy": 0.6982758620689655,
+    "majority_class_share": 0.5573770491803278,
+    "lstm_hidden_pc1_variance": 0.9523072242736816,
+    "lstm_hidden_pc1_corr_with_true_share": 0.6778470831696276
+  },
+  "activations": {
+    "classroom_mae": {
+      "tanh": [
+        0.41355164680410833,
+        0.056813043249815884
+      ],
+      "sigmoid": [
+        0.5027891097173971,
+        0.021305476190937672
+      ],
+      "step": [
+        0.4552109656439107,
+        0.051037826899397974
+      ]
+    },
+    "classroom_corr": {
+      "tanh": [
+        0.6363022397959813,
+        0.02436806608257521
+      ],
+      "sigmoid": [
+        0.4257802751841927,
+        0.33747980637130914
+      ],
+      "step": [
+        0.36051390677621864,
+        0.24105448528560258
+      ]
+    },
+    "single_person_forecast_mae": {
+      "tanh": [
+        0.15485712885856628,
+        0.007844218442996143
+      ],
+      "sigmoid": [
+        0.11056856562693913,
+        0.012689303186839822
+      ],
+      "step": [
+        0.17440694818894067,
+        0.0579454783728972
+      ],
+      "last_value": 0.06308653950691223
+    },
+    "gradient_reaching_20_steps_back": {
+      "tanh": 0.010216651700776014,
+      "sigmoid": 0.00105384800931677,
+      "step": 0.005518143601772501
+    }
+  },
+  "figures": [
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\sequence\\classroom_lstm_transformer.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\sequence\\classroom_attention.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\sequence\\classroom_latent_space.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\sequence\\lstm_activations.png"
+  ]
+}

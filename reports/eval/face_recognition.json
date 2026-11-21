@@ -1,0 +1,160 @@
+{
+  "detection_rate": 1.0,
+  "images": 13233,
+  "threshold": 0.363,
+  "verification": {
+    "FAR": 0.0010833333333333333,
+    "FRR": 0.008889005427799775,
+    "TAR": 0.9911109945722002,
+    "genuine_pairs": 38137,
+    "impostor_pairs": 60000,
+    "TAR@FAR=0.01": {
+      "TAR": 0.9960405905026615,
+      "threshold": 0.2975792415984897
+    },
+    "TAR@FAR=0.001": {
+      "TAR": 0.9908225607677583,
+      "threshold": 0.36489176363321635
+    },
+    "TAR@FAR=0.0001": {
+      "TAR": 0.9808322626320896,
+      "threshold": 0.41669187756107656
+    }
+  },
+  "group_verification": {
+    "gender": {
+      "by_group": {
+        "female": {
+          "FAR": 0.0019534184823441023,
+          "FRR": 0.015196662693682956,
+          "TAR": 0.9848033373063171,
+          "genuine_pairs": 6712,
+          "identities": 1485
+        },
+        "male": {
+          "FAR": 0.0013048933500627352,
+          "FRR": 0.007541766109785203,
+          "TAR": 0.9924582338902148,
+          "genuine_pairs": 31425,
+          "identities": 4236
+        }
+      },
+      "FRR_gap": 0.0076548965838977535,
+      "FAR_gap": 0.0006485251322813671
+    },
+    "ethnicity": {
+      "by_group": {
+        "asian": {
+          "FAR": 0.0017104336452359392,
+          "FRR": 0.005068994649394537,
+          "TAR": 0.9949310053506054,
+          "genuine_pairs": 3551,
+          "identities": 680
+        },
+        "black": {
+          "FAR": 0.005614567526555387,
+          "FRR": 0.0040114613180515755,
+          "TAR": 0.9959885386819485,
+          "genuine_pairs": 1745,
+          "identities": 406
+        },
+        "white": {
+          "FAR": 0.0016067483430407712,
+          "FRR": 0.009561219207697695,
+          "TAR": 0.9904387807923023,
+          "genuine_pairs": 32841,
+          "identities": 4635
+        }
+      },
+      "FRR_gap": 0.00554975788964612,
+      "FAR_gap": 0.004007819183514616
+    }
+  },
+  "sessions": {
+    "attendance_recall": 0.994,
+    "false_present_rate": 0.001,
+    "count_MAE": 0.155,
+    "sessions": 200,
+    "class_size": 30,
+    "recall_by_gender": {
+      "female": {
+        "recall": 0.9954995499549955,
+        "n": 1111
+      },
+      "male": {
+        "recall": 0.9935716122396503,
+        "n": 3889
+      }
+    },
+    "recall_gap_gender": {
+      "gap": 0.0019279377153451627,
+      "best": "female",
+      "worst": "male",
+      "by_group": {
+        "female": 0.9954995499549955,
+        "male": 0.9935716122396503
+      }
+    },
+    "recall_by_ethnicity": {
+      "asian": {
+        "recall": 1.0,
+        "n": 471
+      },
+      "black": {
+        "recall": 1.0,
+        "n": 217
+      },
+      "white": {
+        "recall": 0.9930426716141002,
+        "n": 4312
+      }
+    },
+    "recall_gap_ethnicity": {
+      "gap": 0.006957328385899797,
+      "best": "asian",
+      "worst": "white",
+      "by_group": {
+        "asian": 1.0,
+        "black": 1.0,
+        "white": 0.9930426716141002
+      }
+    }
+  },
+  "robustness": {
+    "blur": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.982713915298185,
+      "probes": 1157
+    },
+    "low_light": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.9974070872947277,
+      "probes": 1157
+    },
+    "noise": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.9783923941227312,
+      "probes": 1157
+    },
+    "small_face": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.9956784788245462,
+      "probes": 1157
+    },
+    "jpeg": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.9913569576490925,
+      "probes": 1157
+    },
+    "mask_occlusion": {
+      "face_detected": 0.9982713915298185,
+      "rank1_identified": 0.9870354364736387,
+      "probes": 1157
+    },
+    "clean": {
+      "face_detected": 1.0,
+      "rank1_identified": 0.9982713915298185,
+      "probes": 1157
+    }
+  }
+}

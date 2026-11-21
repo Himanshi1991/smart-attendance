@@ -1,0 +1,1416 @@
+{
+  "detection": {
+    "yolov8n": {
+      "mAP50": 0.32793841228483384,
+      "mAP75": 0.0655196429056749,
+      "mAP50_95": 0.11144637674956688,
+      "count_threshold_from_val": 0.45,
+      "count_mae": 2.6,
+      "count_rmse": 3.0156454776811588,
+      "count_mape": 0.18908287790640732,
+      "count_bias": -2.4352941176470586,
+      "recall50_at_threshold": 0.4253666954270923,
+      "ms_per_image_median": 66.71749986708164,
+      "pred_counts": [
+        11,
+        10,
+        15,
+        13,
+        11,
+        11,
+        12,
+        11,
+        12,
+        13,
+        14,
+        11,
+        14,
+        14,
+        10,
+        11,
+        12,
+        13,
+        13,
+        11,
+        11,
+        11,
+        11,
+        9,
+        13,
+        12,
+        9,
+        10,
+        13,
+        11,
+        11,
+        14,
+        11,
+        11,
+        12,
+        11,
+        10,
+        11,
+        10,
+        8,
+        11,
+        12,
+        10,
+        7,
+        10,
+        11,
+        12,
+        10,
+        11,
+        11,
+        10,
+        10,
+        10,
+        10,
+        8,
+        10,
+        9,
+        8,
+        9,
+        9,
+        9,
+        10,
+        11,
+        11,
+        12,
+        14,
+        12,
+        11,
+        10,
+        9,
+        13,
+        11,
+        12,
+        11,
+        12,
+        12,
+        12,
+        13,
+        12,
+        11,
+        16,
+        12,
+        13,
+        12,
+        12
+      ]
+    },
+    "yolov8s": {
+      "mAP50": 0.3206228507485517,
+      "mAP75": 0.06580518775360134,
+      "mAP50_95": 0.11243708527093732,
+      "count_threshold_from_val": 0.5,
+      "count_mae": 1.611764705882353,
+      "count_rmse": 2.0204833434543503,
+      "count_mape": 0.11700789406671758,
+      "count_bias": -1.3294117647058823,
+      "recall50_at_threshold": 0.4702329594477998,
+      "ms_per_image_median": 151.13119967281818,
+      "pred_counts": [
+        11,
+        10,
+        14,
+        10,
+        13,
+        12,
+        13,
+        13,
+        12,
+        13,
+        15,
+        13,
+        14,
+        13,
+        12,
+        12,
+        11,
+        12,
+        13,
+        13,
+        12,
+        13,
+        15,
+        14,
+        14,
+        12,
+        13,
+        11,
+        12,
+        13,
+        10,
+        12,
+        11,
+        12,
+        12,
+        13,
+        13,
+        12,
+        12,
+        12,
+        11,
+        11,
+        11,
+        9,
+        9,
+        13,
+        11,
+        13,
+        12,
+        13,
+        12,
+        13,
+        12,
+        12,
+        10,
+        14,
+        14,
+        12,
+        11,
+        12,
+        14,
+        11,
+        15,
+        12,
+        11,
+        13,
+        13,
+        14,
+        11,
+        10,
+        10,
+        12,
+        12,
+        13,
+        12,
+        14,
+        12,
+        13,
+        15,
+        12,
+        14,
+        13,
+        13,
+        13,
+        12
+      ]
+    },
+    "fasterrcnn_resnet50_fpn": {
+      "mAP50": 0.3216212795279856,
+      "mAP75": 0.04381298951394193,
+      "mAP50_95": 0.09848926508553314,
+      "count_threshold_from_val": 0.5,
+      "count_mae": 1.7294117647058824,
+      "count_rmse": 2.1720145162552504,
+      "count_mape": 0.12922156275097452,
+      "count_bias": 1.3529411764705883,
+      "recall50_at_threshold": 0.5383951682484901,
+      "ms_per_image_median": 2036.9601999409497,
+      "pred_counts": [
+        17,
+        13,
+        17,
+        15,
+        15,
+        13,
+        15,
+        16,
+        14,
+        15,
+        17,
+        16,
+        14,
+        14,
+        14,
+        14,
+        12,
+        13,
+        14,
+        17,
+        14,
+        15,
+        18,
+        16,
+        16,
+        19,
+        17,
+        15,
+        14,
+        17,
+        18,
+        15,
+        15,
+        15,
+        16,
+        15,
+        16,
+        14,
+        15,
+        13,
+        15,
+        12,
+        14,
+        12,
+        11,
+        17,
+        15,
+        15,
+        16,
+        16,
+        16,
+        15,
+        15,
+        14,
+        12,
+        16,
+        15,
+        15,
+        14,
+        15,
+        16,
+        15,
+        17,
+        15,
+        15,
+        16,
+        14,
+        16,
+        14,
+        16,
+        14,
+        13,
+        13,
+        17,
+        18,
+        16,
+        16,
+        17,
+        15,
+        14,
+        16,
+        14,
+        13,
+        13,
+        13
+      ]
+    },
+    "yolov8n-kaggle": {
+      "mAP50": 0.6082854871908888,
+      "mAP75": 0.1426198779956386,
+      "mAP50_95": 0.22952753996022618,
+      "count_threshold_from_val": 0.35,
+      "count_mae": 1.4588235294117646,
+      "count_rmse": 1.8278885279437134,
+      "count_mape": 0.10662788192199954,
+      "count_bias": -1.011764705882353,
+      "recall50_at_threshold": 0.6194995685936152,
+      "ms_per_image_median": 69.8932004161179,
+      "pred_counts": [
+        12,
+        11,
+        14,
+        11,
+        13,
+        10,
+        11,
+        13,
+        9,
+        12,
+        15,
+        15,
+        12,
+        12,
+        12,
+        12,
+        12,
+        14,
+        13,
+        12,
+        12,
+        12,
+        14,
+        14,
+        14,
+        13,
+        15,
+        12,
+        12,
+        15,
+        12,
+        12,
+        12,
+        12,
+        14,
+        13,
+        15,
+        13,
+        14,
+        13,
+        13,
+        14,
+        13,
+        12,
+        10,
+        14,
+        14,
+        12,
+        13,
+        13,
+        11,
+        12,
+        14,
+        11,
+        11,
+        13,
+        12,
+        14,
+        13,
+        11,
+        12,
+        13,
+        12,
+        12,
+        12,
+        13,
+        14,
+        13,
+        12,
+        11,
+        12,
+        12,
+        11,
+        12,
+        13,
+        13,
+        14,
+        13,
+        17,
+        11,
+        12,
+        13,
+        13,
+        12,
+        13
+      ]
+    },
+    "true_counts": [
+      13,
+      13,
+      14,
+      14,
+      14,
+      14,
+      14,
+      15,
+      14,
+      14,
+      14,
+      13,
+      15,
+      14,
+      13,
+      14,
+      14,
+      15,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      13,
+      14,
+      12,
+      13,
+      14,
+      14,
+      15,
+      14,
+      14,
+      14,
+      12,
+      14,
+      13,
+      14,
+      14,
+      14,
+      14,
+      14,
+      13,
+      14,
+      14,
+      13,
+      14,
+      13,
+      14,
+      14,
+      14,
+      13,
+      14,
+      14,
+      14,
+      14,
+      14,
+      12,
+      15,
+      14,
+      13,
+      14,
+      14,
+      15,
+      13,
+      14,
+      14,
+      13,
+      13,
+      14,
+      11,
+      13,
+      13,
+      13,
+      13,
+      13,
+      12,
+      13,
+      13,
+      14,
+      12,
+      13,
+      13
+    ]
+  },
+  "states_face_rule": {
+    "coverage": {
+      "attentive": 291,
+      "distracted": 148,
+      "inactive": 241,
+      "unclear": 105,
+      "no face": 374
+    },
+    "judged_fraction": 0.5867126833477135,
+    "judged": {
+      "accuracy": 0.5235294117647059,
+      "macro_f1": 0.4469430406839828,
+      "precision": [
+        0.718213058419244,
+        0.9256756756756757,
+        0.04149377593360996
+      ],
+      "recall": [
+        0.5971428571428572,
+        0.4612794612794613,
+        0.30303030303030304
+      ],
+      "f1": [
+        0.6521060842433698,
+        0.6157303370786517,
+        0.072992700729927
+      ],
+      "confusion": [
+        [
+          209,
+          10,
+          131
+        ],
+        [
+          60,
+          137,
+          100
+        ],
+        [
+          22,
+          1,
+          10
+        ]
+      ]
+    },
+    "all_students_unjudged_as_attentive": {
+      "accuracy": 0.3684210526315789,
+      "macro_f1": 0.2917804454328384,
+      "precision": [
+        0.36363636363636365,
+        0.9256756756756757,
+        0.04149377593360996
+      ],
+      "recall": [
+        0.665083135391924,
+        0.21207430340557276,
+        0.10869565217391304
+      ],
+      "f1": [
+        0.47019311502938704,
+        0.34508816120906805,
+        0.06006006006006006
+      ],
+      "confusion": [
+        [
+          280,
+          10,
+          131
+        ],
+        [
+          409,
+          137,
+          100
+        ],
+        [
+          81,
+          1,
+          10
+        ]
+      ]
+    }
+  },
+  "states_cnn": {
+    "resnet18": {
+      "test": {
+        "accuracy": 0.6169111302847282,
+        "macro_f1": 0.45855944208346955,
+        "precision": [
+          0.5264663805436338,
+          0.782608695652174,
+          0.21739130434782608
+        ],
+        "recall": [
+          0.8741092636579573,
+          0.5294117647058824,
+          0.05434782608695652
+        ],
+        "f1": [
+          0.6571428571428571,
+          0.631578947368421,
+          0.08695652173913045
+        ],
+        "confusion": [
+          [
+            368,
+            47,
+            6
+          ],
+          [
+            292,
+            342,
+            12
+          ],
+          [
+            39,
+            48,
+            5
+          ]
+        ]
+      },
+      "macro_f1_95CI": [
+        0.429717640801162,
+        0.49099123913526715
+      ],
+      "val_f1_best": 0.42313242594846184,
+      "best_epoch": 3,
+      "ms_per_crop": 15.91655280404082,
+      "history": {
+        "train_loss": [
+          1.14551383174128,
+          0.7529760574301084,
+          0.619535270664427,
+          0.41793807813276845,
+          0.26152506853557295,
+          0.1935972881813844
+        ],
+        "val_f1": [
+          0.3361830122382496,
+          0.3852602029947568,
+          0.42313242594846184,
+          0.34946518354590106,
+          0.40247208801735157,
+          0.38371487064954396
+        ],
+        "epoch_s": [
+          93.54327830020338,
+          95.10319349961355,
+          93.22497539967299,
+          92.3356431000866,
+          93.19989369995892,
+          97.42481769993901
+        ],
+        "best_epoch": 3
+      },
+      "params_M": 11.178051,
+      "trainable_params_M": 8.395267
+    },
+    "googlenet": {
+      "test": {
+        "accuracy": 0.5565142364106989,
+        "macro_f1": 0.4442896393069335,
+        "precision": [
+          0.528023598820059,
+          0.7597765363128491,
+          0.12195121951219512
+        ],
+        "recall": [
+          0.850356294536817,
+          0.42105263157894735,
+          0.16304347826086957
+        ],
+        "f1": [
+          0.651501364877161,
+          0.5418326693227091,
+          0.13953488372093023
+        ],
+        "confusion": [
+          [
+            358,
+            34,
+            29
+          ],
+          [
+            295,
+            272,
+            79
+          ],
+          [
+            25,
+            52,
+            15
+          ]
+        ]
+      },
+      "macro_f1_95CI": [
+        0.4153395597528616,
+        0.4737354494070487
+      ],
+      "val_f1_best": 0.4160659425060347,
+      "best_epoch": 3,
+      "ms_per_crop": 33.21399672135286,
+      "history": {
+        "train_loss": [
+          0.9895985734959444,
+          0.6289687367777029,
+          0.49246049610277015,
+          0.31236883708172375,
+          0.2099110380642944,
+          0.16490265439885357
+        ],
+        "val_f1": [
+          0.37535654414408554,
+          0.39361968309672163,
+          0.4160659425060347,
+          0.3678749565204907,
+          0.3600723336605141,
+          0.33953514982722505
+        ],
+        "epoch_s": [
+          156.4215605999343,
+          157.10709090018645,
+          138.55211700033396,
+          113.8408606001176,
+          270.2648562998511,
+          111.22202560026199
+        ],
+        "best_epoch": 3
+      },
+      "params_M": 5.602979,
+      "trainable_params_M": 2.329059
+    }
+  },
+  "trend": {
+    "detector": "yolov8n-kaggle",
+    "state_model": "resnet18",
+    "frames": [
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 0,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.6153846153846154,
+        "pred_attentive": 0.75
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 1,
+        "true_count": 13,
+        "pred_count": 11,
+        "true_attentive": 0.6923076923076923,
+        "pred_attentive": 0.7272727272727273
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 2,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.5,
+        "pred_attentive": 0.7857142857142857
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 3,
+        "true_count": 14,
+        "pred_count": 11,
+        "true_attentive": 0.5,
+        "pred_attentive": 0.8181818181818182
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 4,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.42857142857142855,
+        "pred_attentive": 0.7692307692307693
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 5,
+        "true_count": 14,
+        "pred_count": 10,
+        "true_attentive": 0.5,
+        "pred_attentive": 0.7
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 6,
+        "true_count": 14,
+        "pred_count": 11,
+        "true_attentive": 0.6428571428571429,
+        "pred_attentive": 0.8181818181818182
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 7,
+        "true_count": 15,
+        "pred_count": 13,
+        "true_attentive": 0.6666666666666666,
+        "pred_attentive": 0.8461538461538461
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 8,
+        "true_count": 14,
+        "pred_count": 9,
+        "true_attentive": 0.7857142857142857,
+        "pred_attentive": 0.8888888888888888
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 9,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.9285714285714286,
+        "pred_attentive": 0.9166666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 10,
+        "true_count": 14,
+        "pred_count": 15,
+        "true_attentive": 0.8571428571428571,
+        "pred_attentive": 0.8666666666666667
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 11,
+        "true_count": 13,
+        "pred_count": 15,
+        "true_attentive": 0.3076923076923077,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 12,
+        "true_count": 15,
+        "pred_count": 12,
+        "true_attentive": 0.6666666666666666,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 13,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.5714285714285714,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 14,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.5384615384615384,
+        "pred_attentive": 0.9166666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 15,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.35714285714285715,
+        "pred_attentive": 0.9166666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 16,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.5714285714285714,
+        "pred_attentive": 0.9166666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 17,
+        "true_count": 15,
+        "pred_count": 14,
+        "true_attentive": 0.3333333333333333,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 18,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.5384615384615384
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 19,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 20,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.07142857142857142,
+        "pred_attentive": 0.4166666666666667
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 21,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.35714285714285715,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 22,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.7857142857142857
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 23,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 24,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.42857142857142855,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 25,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.21428571428571427,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 26,
+        "true_count": 13,
+        "pred_count": 15,
+        "true_attentive": 0.3076923076923077,
+        "pred_attentive": 0.6
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 27,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 28,
+        "true_count": 12,
+        "pred_count": 12,
+        "true_attentive": 0.3333333333333333,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 29,
+        "true_count": 13,
+        "pred_count": 15,
+        "true_attentive": 0.46153846153846156,
+        "pred_attentive": 0.8
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 30,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.07142857142857142,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 31,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.5833333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 32,
+        "true_count": 15,
+        "pred_count": 12,
+        "true_attentive": 0.2,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 33,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.21428571428571427,
+        "pred_attentive": 0.5833333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 34,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.35714285714285715,
+        "pred_attentive": 0.5714285714285714
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 35,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.5384615384615384
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 36,
+        "true_count": 12,
+        "pred_count": 15,
+        "true_attentive": 0.25,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 37,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.07142857142857142,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 38,
+        "true_count": 13,
+        "pred_count": 14,
+        "true_attentive": 0.07692307692307693,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 39,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.0,
+        "pred_attentive": 0.6923076923076923
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 40,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.07142857142857142,
+        "pred_attentive": 0.5384615384615384
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 41,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.07142857142857142,
+        "pred_attentive": 0.5714285714285714
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 42,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.0,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 43,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 44,
+        "true_count": 13,
+        "pred_count": 10,
+        "true_attentive": 0.23076923076923078,
+        "pred_attentive": 0.3
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 45,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.21428571428571427,
+        "pred_attentive": 0.7142857142857143
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 46,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.5714285714285714
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 47,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.15384615384615385,
+        "pred_attentive": 0.6666666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 48,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.6923076923076923
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 49,
+        "true_count": 13,
+        "pred_count": 13,
+        "true_attentive": 0.15384615384615385,
+        "pred_attentive": 0.6923076923076923
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 50,
+        "true_count": 14,
+        "pred_count": 11,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.5454545454545454
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 51,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.5833333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 52,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.35714285714285715,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 53,
+        "true_count": 13,
+        "pred_count": 11,
+        "true_attentive": 0.23076923076923078,
+        "pred_attentive": 0.6363636363636364
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 54,
+        "true_count": 14,
+        "pred_count": 11,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.7272727272727273
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 55,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.42857142857142855,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 56,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.5833333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 57,
+        "true_count": 14,
+        "pred_count": 14,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.6428571428571429
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 58,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.14285714285714285,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 59,
+        "true_count": 12,
+        "pred_count": 11,
+        "true_attentive": 0.08333333333333333,
+        "pred_attentive": 0.45454545454545453
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 60,
+        "true_count": 15,
+        "pred_count": 12,
+        "true_attentive": 0.4,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 61,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.5384615384615384
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 62,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.3076923076923077,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 63,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.5,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 64,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.42857142857142855,
+        "pred_attentive": 0.5833333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 65,
+        "true_count": 15,
+        "pred_count": 13,
+        "true_attentive": 0.2,
+        "pred_attentive": 0.6153846153846154
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 66,
+        "true_count": 13,
+        "pred_count": 14,
+        "true_attentive": 0.0,
+        "pred_attentive": 0.7857142857142857
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 67,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.5714285714285714,
+        "pred_attentive": 0.7692307692307693
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 68,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.2857142857142857,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 69,
+        "true_count": 13,
+        "pred_count": 11,
+        "true_attentive": 0.38461538461538464,
+        "pred_attentive": 0.8181818181818182
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 70,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.6923076923076923,
+        "pred_attentive": 0.9166666666666666
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 71,
+        "true_count": 14,
+        "pred_count": 12,
+        "true_attentive": 0.7857142857142857,
+        "pred_attentive": 0.75
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 72,
+        "true_count": 11,
+        "pred_count": 11,
+        "true_attentive": 0.5454545454545454,
+        "pred_attentive": 0.8181818181818182
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 73,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.46153846153846156,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 74,
+        "true_count": 13,
+        "pred_count": 13,
+        "true_attentive": 0.3076923076923077,
+        "pred_attentive": 0.8461538461538461
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 75,
+        "true_count": 13,
+        "pred_count": 13,
+        "true_attentive": 0.5384615384615384,
+        "pred_attentive": 0.6923076923076923
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 76,
+        "true_count": 13,
+        "pred_count": 14,
+        "true_attentive": 0.5384615384615384,
+        "pred_attentive": 0.5
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 77,
+        "true_count": 13,
+        "pred_count": 13,
+        "true_attentive": 0.46153846153846156,
+        "pred_attentive": 0.6923076923076923
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 78,
+        "true_count": 12,
+        "pred_count": 17,
+        "true_attentive": 0.3333333333333333,
+        "pred_attentive": 0.7647058823529411
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 79,
+        "true_count": 13,
+        "pred_count": 11,
+        "true_attentive": 0.3076923076923077,
+        "pred_attentive": 0.8181818181818182
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 80,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.6923076923076923,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 81,
+        "true_count": 14,
+        "pred_count": 13,
+        "true_attentive": 0.7857142857142857,
+        "pred_attentive": 0.9230769230769231
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 82,
+        "true_count": 12,
+        "pred_count": 13,
+        "true_attentive": 0.6666666666666666,
+        "pred_attentive": 0.8461538461538461
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 83,
+        "true_count": 13,
+        "pred_count": 12,
+        "true_attentive": 0.6923076923076923,
+        "pred_attentive": 0.8333333333333334
+      },
+      {
+        "video": "taimoor-zaeem-1",
+        "frame": 84,
+        "true_count": 13,
+        "pred_count": 13,
+        "true_attentive": 0.6153846153846154,
+        "pred_attentive": 0.8461538461538461
+      }
+    ],
+    "attentive_share_mae": 0.32595598557536276,
+    "attentive_share_corr": 0.6114004583074464,
+    "true_mean_attentive": 0.3640943370355135,
+    "pred_mean_attentive": 0.688024897056039
+  },
+  "figures": [
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\vision\\conv2d_explained.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\vision\\resnet_filters_featuremaps.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\vision\\conv3d_motion.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\vision\\classroom_test_eval.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\vision\\classroom_test_annotated.jpg"
+  ]
+}

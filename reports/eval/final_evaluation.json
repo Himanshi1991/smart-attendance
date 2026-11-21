@@ -1,0 +1,325 @@
+{
+  "pipeline": {
+    "detector": "yolov8n-kaggle",
+    "count_threshold": 0.35,
+    "state_model": "resnet18 (fine-tuned)"
+  },
+  "robustness": {
+    "clean": {
+      "mAP50": 0.6082854871908888,
+      "count_mae": 1.4588235294117646,
+      "state_macro_f1": 0.46707229497185104,
+      "state_accuracy": 0.6074201898188093
+    },
+    "low light (30% brightness)": {
+      "mAP50": 0.6082412300261715,
+      "count_mae": 1.5529411764705883,
+      "state_macro_f1": 0.2914452377118113,
+      "state_accuracy": 0.455565142364107
+    },
+    "motion blur (15 px)": {
+      "mAP50": 0.5893717037026496,
+      "count_mae": 1.9176470588235295,
+      "state_macro_f1": 0.3267111447612293,
+      "state_accuracy": 0.41501294219154444
+    },
+    "sensor noise (sigma 25)": {
+      "mAP50": 0.5192781161595138,
+      "count_mae": 4.258823529411765,
+      "state_macro_f1": 0.18304865119566496,
+      "state_accuracy": 0.362381363244176
+    },
+    "heavy JPEG (quality 15)": {
+      "mAP50": 0.606217863543124,
+      "count_mae": 2.011764705882353,
+      "state_macro_f1": 0.30365661782285647,
+      "state_accuracy": 0.4245038826574633
+    },
+    "half resolution": {
+      "mAP50": 0.6059551584560733,
+      "count_mae": 1.4823529411764707,
+      "state_macro_f1": 0.4889636279307783,
+      "state_accuracy": 0.6125970664365833
+    }
+  },
+  "fairness": {
+    "detection_recall_by_size": {
+      "small (back rows)": 0.45595854922279794,
+      "medium": 0.6010362694300518,
+      "large (front rows)": 0.8010335917312662
+    },
+    "detection_recall_gap_size": 0.34507504250846827,
+    "detection_recall_by_true_state": {
+      "attentive": 0.5653206650831354,
+      "distracted": 0.6687306501547987,
+      "inactive": 0.5217391304347826
+    },
+    "detection_recall_gap_state": 0.14699151972001612,
+    "state_by_size": {
+      "small (back rows)": {
+        "accuracy": 0.6088082901554405,
+        "macro_f1": 0.48104867020529674,
+        "n": 386
+      },
+      "medium": {
+        "accuracy": 0.6321243523316062,
+        "macro_f1": 0.46113394941082486,
+        "n": 386
+      },
+      "large (front rows)": {
+        "accuracy": 0.5813953488372093,
+        "macro_f1": 0.3891510096329373,
+        "n": 387
+      }
+    },
+    "state_accuracy_gap_size": 0.05072900349439691,
+    "size_edges_px2": [
+      14603.280000000015,
+      29100.980000000018
+    ]
+  },
+  "errors": {
+    "students": 1159,
+    "missed": 441,
+    "false_boxes": {
+      "duplicate of a found student": 8,
+      "poorly placed box on a student": 308,
+      "background": 39
+    },
+    "missed_by_size": {
+      "small (back rows)": 210,
+      "medium": 154,
+      "large (front rows)": 77
+    },
+    "missed_by_state": {
+      "attentive": 183,
+      "distracted": 214,
+      "inactive": 44
+    },
+    "state_confusion": [
+      [
+        362,
+        54,
+        5
+      ],
+      [
+        300,
+        334,
+        12
+      ],
+      [
+        30,
+        54,
+        8
+      ]
+    ],
+    "largest_state_confusions": [
+      {
+        "true": "distracted",
+        "predicted": "attentive",
+        "n": 300,
+        "share_of_true": 0.46439628482972134
+      },
+      {
+        "true": "attentive",
+        "predicted": "distracted",
+        "n": 54,
+        "share_of_true": 0.12826603325415678
+      },
+      {
+        "true": "inactive",
+        "predicted": "distracted",
+        "n": 54,
+        "share_of_true": 0.5869565217391305
+      }
+    ]
+  },
+  "latency": {
+    "classroom_pipeline": {
+      "detect": {
+        "median": 71.7344000004232,
+        "p95": 100.87467999765066
+      },
+      "states": {
+        "median": 209.85379999910947,
+        "p95": 267.0253199976287
+      },
+      "total": {
+        "median": 283.404599998903,
+        "p95": 365.8683999972709
+      },
+      "frames_per_second_median": 3.5285242370937904
+    },
+    "full_app_yolov8s": {
+      "total": {
+        "median": 1167.8212999977404,
+        "p95": 1294.3803799978923
+      },
+      "detect": {
+        "median": 152.60990000024321,
+        "p95": 171.09654000087173
+      },
+      "faces": {
+        "median": 697.6193000009516,
+        "p95": 774.5293200030574
+      },
+      "engagement": {
+        "median": 317.7269999978307,
+        "p95": 385.4577200014319
+      },
+      "seating": {
+        "median": 1.324700002442114,
+        "p95": 1.5815199993085116
+      },
+      "peak_rss_mb": 762.273792,
+      "mean_seats_found": 2.3793103448275863,
+      "frames": 29
+    },
+    "full_app_yolov8n-kaggle": {
+      "total": {
+        "median": 1124.68949999311,
+        "p95": 1302.9039599983662
+      },
+      "detect": {
+        "median": 65.08780000149272,
+        "p95": 88.1660200000624
+      },
+      "faces": {
+        "median": 739.4497999994201,
+        "p95": 824.2416599990975
+      },
+      "engagement": {
+        "median": 321.2309999980789,
+        "p95": 402.3719400000118
+      },
+      "seating": {
+        "median": 1.1656000024231616,
+        "p95": 1.3877400022465736
+      },
+      "peak_rss_mb": 816.398336,
+      "mean_seats_found": 0.0,
+      "frames": 29
+    },
+    "machine": {
+      "cpu_mhz_now": 1200.0,
+      "battery": {
+        "plugged_in": false,
+        "percent": 43
+      }
+    }
+  },
+  "scorecard": [
+    {
+      "area": "Attendance",
+      "metric": "recall of enrolled students",
+      "value": 0.994,
+      "data": "LFW simulated sessions"
+    },
+    {
+      "area": "Attendance",
+      "metric": "false-present rate",
+      "value": 0.001,
+      "data": "LFW simulated sessions"
+    },
+    {
+      "area": "Attendance",
+      "metric": "stranger false-accept rate",
+      "value": 0.0010833333333333333,
+      "data": "LFW pairs"
+    },
+    {
+      "area": "Fairness",
+      "metric": "attendance recall gap (gender / ethnicity)",
+      "value": 0.006957328385899797,
+      "data": "LFW attributes"
+    },
+    {
+      "area": "Detection",
+      "metric": "mAP50 (yolov8s, varied photos)",
+      "value": 0.8163686862382074,
+      "data": "COCO-classroom test"
+    },
+    {
+      "area": "Counting",
+      "metric": "count error, fully labelled photos (people)",
+      "value": 0.9882352941176471,
+      "data": "COCO-classroom test"
+    },
+    {
+      "area": "Detection",
+      "metric": "mAP50 (fine-tuned YOLOv8n)",
+      "value": 0.6082854871908888,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Counting",
+      "metric": "count error (students per frame)",
+      "value": 1.4588235294117646,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Engagement",
+      "metric": "state macro-F1 (ResNet18, 3 states)",
+      "value": 0.46707229497185104,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Engagement",
+      "metric": "alertness macro-F1 (5-fold CV, one person)",
+      "value": 0.7108751028232045,
+      "data": "drowsiness frames"
+    },
+    {
+      "area": "Trend",
+      "metric": "correlation of predicted vs labelled attentive share (moving average)",
+      "value": 0.6410434386791066,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Fairness",
+      "metric": "detection recall gap, small vs large students",
+      "value": 0.34507504250846827,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Fairness",
+      "metric": "state accuracy gap, small vs large students",
+      "value": 0.05072900349439691,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Robustness",
+      "metric": "mAP50 in the worst condition (sensor noise (sigma 25))",
+      "value": 0.5192781161595138,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Robustness",
+      "metric": "mAP50 in low light",
+      "value": 0.6082412300261715,
+      "data": "Kaggle test classroom"
+    },
+    {
+      "area": "Latency",
+      "metric": "classroom pipeline per frame, p95 (ms)",
+      "value": 365.8683999972709,
+      "data": "this laptop, CPU"
+    },
+    {
+      "area": "Latency",
+      "metric": "full app per frame, p95 (ms, yolov8s)",
+      "value": 1294.3803799978923,
+      "data": "this laptop, CPU"
+    },
+    {
+      "area": "Memory",
+      "metric": "peak memory, full app (MB)",
+      "value": 762.273792,
+      "data": "this laptop"
+    }
+  ],
+  "figures": [
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\eval\\final_robustness_fairness_errors.png",
+    "C:\\Users\\hp\\Desktop\\smart Attendance\\reports\\figures\\eval\\final_error_gallery.png"
+  ]
+}
