@@ -20,5 +20,16 @@ reports/demo/
 # Trained models and caches: too large for GitHub (several files are over 100 MB); re-create them with the commands in the guides
 models/*
 !models/README.md
-reports/experiments/
+reports/experiments/*
 reports/logs/
+
+# ...except the small models the app itself needs, so the online app works (each well under GitHub's 100 MB limit)
+!models/engagement_resnet18.pt
+!models/yolo/
+models/yolo/*
+!models/yolo/yolov8s.pt
+!models/yolo/yolov8n.pt
+!models/yolo/yolov8n-classroom.pt
+!reports/experiments/sequence/
+reports/experiments/sequence/*
+!reports/experiments/sequence/transformer_aggregator.pt

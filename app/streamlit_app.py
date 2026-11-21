@@ -4,11 +4,15 @@ Modes (sidebar):
   * Live attendance   - webcam: recognise enrolled students and mark them present with a timestamp
   * Enroll students   - take 3-5 photos with the camera (or upload) and add a student to the roster
   * Analyze photo/video - full analysis of an uploaded classroom image or video
-Everything runs locally on CPU; nothing leaves this computer.
+Run locally, everything stays on this computer. Online (Streamlit Community Cloud) the live page uses the
+viewer's browser camera, because the cloud server has no camera of its own.
 """
 from __future__ import annotations
 
+import hashlib
+import os
 import shutil
+import sys
 import tempfile
 import time
 from datetime import datetime
@@ -18,6 +22,10 @@ import cv2
 import numpy as np
 import pandas as pd
 import streamlit as st
+
+_SRC = Path(__file__).resolve().parents[1] / "src"
+if str(_SRC) not in sys.path:          # online there is no `pip install -e .`; import the package from src/
+    sys.path.insert(0, str(_SRC))
 
 from smartattend.attendance.live import (LiveAttendance, check_enrolment_photo, draw_live, rebuild_roster,
                                          safe_student_id, save_student_photos)
@@ -32,6 +40,8 @@ ROSTER_DIR = Path(cfg["paths"]["roster_dir"])
 CLASS_ROSTER = Path(cfg["paths"]["roster_file"])
 DEMO_ROSTER = ROOT / "data" / "demo" / "roster.npz"
 REGISTER_DIR = ROOT / "reports" / "attendance"
+# Streamlit Community Cloud runs apps from /mount/src/<repo>; SMARTATTEND_CLOUD=1 forces online mode for testing.
+ON_CLOUD = str(Path(__file__).resolve()).startswith("/mount/src") or os.environ.get("SMARTATTEND_CLOUD") == "1"
 
 
 @st.cache_resource
@@ -62,7 +72,17 @@ def enrolled_students() -> list[str]:
     return sorted(p.name for p in ROSTER_DIR.iterdir() if p.is_dir()) if ROSTER_DIR.exists() else []
 
 
+def register_download(rows: list[dict], key: str) -> None:
+    df = pd.DataFrame(rows)
+    st.download_button("Download register (CSV)", df.to_csv(index=False),
+                       f"attendance_{datetime.now():%Y-%m-%d}.csv", "text/csv", key=key)
+
+
 st.title("Smart Attendance & Classroom Engagement Analyzer")
+if ON_CLOUD:
+    st.warning("**Online demo.** Please do not enrol real students here: anyone with the link can see this app, "
+               "and enrolled students and registers are deleted whenever the app restarts. "
+               "For real classes, run the app on the classroom computer (see README).")
 
 with st.sidebar:
     mode = st.radio("Mode", ["Live attendance", "Enroll students", "Analyze photo/video"])
@@ -144,8 +164,14 @@ elif mode == "Live attendance":
     st.header("Live attendance from the camera")
     roster = load_roster(CLASS_ROSTER)
     with st.sidebar:
-        use_demo = st.checkbox("Use the demo roster (12 LFW people) instead", value=roster is None and DEMO_ROSTER.exists())
-        cam = st.number_input("Camera index", 0, 5, 0)
+        use_demo = (st.checkbox("Use the demo roster (12 LFW people) instead", value=roster is None)
+                    if DEMO_ROSTER.exists() else False)
+        sources = ["Browser camera (take a photo)"] if ON_CLOUD else ["This computer's camera (live video)",
+                                                                       "Browser camera (take a photo)"]
+        source = st.radio("Camera", sources, help="Live video needs a camera attached to the computer running the "
+                          "app. The browser camera works anywhere, including the online app.")
+        browser = source.startswith("Browser")
+        cam = 0 if browser else st.number_input("Camera index", 0, 5, 0)
         threshold = st.slider("Match threshold (higher = stricter)", 0.30, 0.60, float(cfg["face"]["match_threshold"]), 0.01)
     if use_demo:
         roster = load_roster(DEMO_ROSTER)
@@ -153,32 +179,66 @@ elif mode == "Live attendance":
         st.warning("No students enrolled yet. Switch to **Enroll students** in the sidebar first.")
         st.stop()
 
-    key = (str(CLASS_ROSTER if not use_demo else DEMO_ROSTER), tuple(roster.student_ids))
+    key = (str(CLASS_ROSTER if not use_demo else DEMO_ROSTER), tuple(roster.student_ids), browser)
     if st.session_state.get("live_key") != key or "live" not in st.session_state:   # "live" is cleared after enrolment changes
-        st.session_state["live"] = LiveAttendance(roster, confirm_hits=3, window=5)
+        # live video: present after 3 of 5 consecutive frames; photo: each photo is a deliberate, still shot -> 1 match
+        st.session_state["live"] = (LiveAttendance(roster, confirm_hits=1, window=1) if browser
+                                    else LiveAttendance(roster, confirm_hits=3, window=5))
         st.session_state["live_key"] = key
     live: LiveAttendance = st.session_state["live"]
 
     top = st.columns([1, 1, 1, 2])
     top[0].metric("Enrolled", len(roster))
-    top[1].metric("Present", len(live.marked))
-    top[2].metric("Absent", len(roster) - len(live.marked))
+    present_ph, absent_ph = top[1].empty(), top[2].empty()      # filled at the end, after any new photo is counted
     with top[3]:
-        run = st.toggle("Camera on", value=False)
+        run = False if browser else st.toggle("Camera on", value=False)
         b1, b2 = st.columns(2)
-        if b1.button("Save register"):
+        if not ON_CLOUD and b1.button("Save register"):
             st.success(f"Saved {live.save(REGISTER_DIR)}")
         if b2.button("New session (reset)"):
             st.session_state.pop("live", None)
+            st.session_state.pop("last_photo", None)
             st.rerun()
 
     left, right = st.columns([3, 2])
+    if browser:
+        shot = left.camera_input("Take a photo of the class (students facing the camera)")
     frame_ph = left.empty()
     status_ph = left.empty()
     reg_ph = right.empty()
+    if browser:
+        right.caption("Every enrolled student recognised in a photo is marked present. Take more photos to catch "
+                      "students who were turned away. Unknown faces are never stored.")
+    else:
+        right.caption("A student is marked present after being recognised in 3 of 5 consecutive frames. "
+                      "Unknown faces are never stored. The register is auto-saved to reports/attendance/.")
+
+    if browser and shot is not None:
+        data = shot.getvalue()
+        digest = hashlib.sha1(data).hexdigest()
+        frame = decode(data)
+        engine = get_engine()
+        faces = engine.analyze(frame)
+        labels, scores = (roster.match(np.stack([f.embedding for f in faces]), threshold) if faces else ([], []))
+        if st.session_state.get("last_photo") != digest:     # a rerun shows the same photo again: count it once
+            st.session_state["last_photo"] = digest
+            newly = live.update(labels, scores)
+            for sid in newly:
+                st.toast(f"{sid} marked present at {live.marked[sid]['time']}")
+            if newly and not ON_CLOUD:
+                live.save(REGISTER_DIR)
+        frame_ph.image(draw_live(frame, faces, labels, scores, set(live.marked))[:, :, ::-1], channels="RGB",
+                       width="stretch")
+        known = sum(l is not None for l in labels)
+        status_ph.caption(f"{len(faces)} face(s) in the photo · {known} recognised · "
+                          f"{len(live.marked)}/{len(roster)} present")
+    elif browser:
+        frame_ph.info("Click **Take Photo** above. Allow camera access if your browser asks.")
+    present_ph.metric("Present", len(live.marked))
+    absent_ph.metric("Absent", len(roster) - len(live.marked))
     reg_ph.dataframe(pd.DataFrame(live.register()), width="stretch", hide_index=True)
-    right.caption("A student is marked present after being recognised in 3 of 5 consecutive frames. "
-                  "Unknown faces are never stored. The register is auto-saved to reports/attendance/.")
+    with right:
+        register_download(live.register(), "live_register")
 
     if run:
         engine = get_engine()
@@ -202,6 +262,8 @@ elif mode == "Live attendance":
                         live.save(REGISTER_DIR)
                     if newly:
                         reg_ph.dataframe(pd.DataFrame(live.register()), width="stretch", hide_index=True)
+                        present_ph.metric("Present", len(live.marked))
+                        absent_ph.metric("Absent", len(roster) - len(live.marked))
                     vis = draw_live(frame, faces, labels, scores, set(live.marked))
                     frame_ph.image(vis[:, :, ::-1], channels="RGB", width="stretch")
                     n += 1
@@ -212,7 +274,7 @@ elif mode == "Live attendance":
                                           f"{len(live.marked)}/{len(roster)} present")
             finally:
                 cap.release()
-    else:
+    elif not browser:
         frame_ph.info("Turn **Camera on** to start taking attendance.")
 
 
@@ -220,10 +282,13 @@ elif mode == "Live attendance":
 else:
     st.header("Analyze a classroom photo or video")
     with st.sidebar:
-        detector = st.selectbox("Person detector", ["yolov8s", "yolov8n", "yolov8n-classroom", "fasterrcnn_resnet50_fpn",
-                                                    "retinanet_resnet50_fpn"])
-        roster_choice = st.radio("Roster", ["class roster", "demo roster (12 LFW identities)"],
-                                 index=0 if CLASS_ROSTER.exists() else 1)
+        detectors = ["yolov8s", "yolov8n", "yolov8n-classroom"]
+        if not ON_CLOUD:      # the R-CNN family is 10x slower and too heavy for the free online server
+            detectors += ["fasterrcnn_resnet50_fpn", "retinanet_resnet50_fpn"]
+        detector = st.selectbox("Person detector", detectors)
+        roster_options = ["class roster"] + (["demo roster (12 LFW identities)"] if DEMO_ROSTER.exists() else [])
+        roster_choice = st.radio("Roster", roster_options,
+                                 index=0 if CLASS_ROSTER.exists() or len(roster_options) == 1 else 1)
         roster_file = CLASS_ROSTER if roster_choice == "class roster" else DEMO_ROSTER
         st.write(f"Roster: {'loaded' if roster_file.exists() else 'not found'}")
         demo_video = ROOT / "data" / "demo" / "class_demo.mp4"
